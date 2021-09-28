@@ -38,6 +38,7 @@
 
 static portTickType xLastWakeTime;
 
+static const uint8_t TASKBARH_HIGH = 16;
 static const char * TAG = "EPD_2IN13_TEST";
 char * data = "";
 
@@ -83,9 +84,6 @@ void content_Task(void * pvParameters)
 {
     struct MQTTMessage *pxRxedMessage= NULL;//结构体类型的指针变量
     pxRxedMessage = & xMessage;          //指针指向AMessage结构体
-    sFONT Font = Font16;                 //显示字体
-    uint8_t xStart = 0;
-    uint8_t yStart = Font.Height;
     while (1)
      {
         if( xQueue == NULL)
@@ -96,6 +94,7 @@ void content_Task(void * pvParameters)
         }
         if( xQueueReceive( xQueue, ( void * )pxRxedMessage, ( TickType_t ) 10 ) )
         {
+            /*订阅成功说明Wi-Fi连接没问题，更新Wi-Fi图标*/
             if(pxRxedMessage->data_type == QUEUE_TYPE_CONNECT_SUCCESS)
             {
                 Paint_ClearWindows(250-16, 0,  16, 16, WHITE);
@@ -104,44 +103,59 @@ void content_Task(void * pvParameters)
                 printf("wifi connect success\r\n");
                 continue;
             }
-            /*如果消息长度小于*/
-            if(pxRxedMessage->data_len < pxRxedMessage->data_len_last)
+            if(pxRxedMessage->data_type == QUEUE_TYPE_JSON)
             {
-                EPD_2IN13_Init(EPD_2IN13_FULL);
-                DEV_Delay_ms(500);
+                cJSON *json = cJSON_ParseWithLength(pxRxedMessage->data, pxRxedMessage->data_len);
+                ped_display_text(json);
+                cJSON_Delete(json);
             }
-            else
-            {
-                EPD_2IN13_Init(EPD_2IN13_PART);
-            }
-                
-            (pxRxedMessage->data)[pxRxedMessage->data_len] = '\0';//添加结束符号
-            printf("pxRxedMessage->data = %s\r\n",pxRxedMessage->data);
-            Paint_ClearWindows(xStart, yStart,  xStart+Font.Width * (pxRxedMessage->data_len_last), yStart + Font.Height, WHITE);
-            Paint_DrawString_EN(xStart, yStart, pxRxedMessage->data, &Font16, WHITE, BLACK);
-            
-
-            EPD_2IN13_Display(BlackImage);
-            pxRxedMessage->data_len_last = pxRxedMessage->data_len;
         }
      }
 }
 
-
-
-void ped_sleep(void)
+void ped_display_text(cJSON *json)
 {
-    EPD_2IN13_Sleep();
+    sFONT Font = Font16;
+
+    /*状态栏占16位，所以y需要从16位像素开始*/
+    uint8_t refersh =cJSON_GetObjectItem(json,"refresh")->valueint; 
+    uint8_t x_start =cJSON_GetObjectItem(json,"x")->valueint; 
+    uint8_t y_start =cJSON_GetObjectItem(json,"y")->valueint ;
+    uint8_t clear_row = cJSON_GetObjectItem(json,"clear_row")->valueint ;
+    char *text =cJSON_GetObjectItem(json,"text")->valuestring; 
+    uint8_t text_len = strlen(text);
+    /*计算每行最多显示字的个数,和可以显示多少列，因为下标从0开始，所以-1*/
+    uint8_t x_max = (Paint.Width/Font.Width)-1;   
+    uint8_t y_max = ((Paint.Height -TASKBARH_HIGH)/Font.Height)-1; 
+    
+    printf("y_max = %d\r\n",y_max);
+
+    x_start = (x_start>x_max)?x_max:x_start;
+    y_start = (y_start>y_max)?y_max:y_start;   
+
+    x_start *= Font.Width;
+    y_start = y_start * Font.Height  + TASKBARH_HIGH; 
+
+    // printf("refersh = %d; x=%d; y=%d;text=%s;text_len = %d\r\n",refersh,x_start,y_start,text,text_len);    
+    if(refersh==EPD_2IN13_PART){
+        EPD_2IN13_Init(EPD_2IN13_PART);
+        if (clear_row==1) Paint_ClearWindows(x_start, y_start, x_start+Font.Width*text_len, y_start + Font.Height, WHITE);
+        else Paint_ClearWindows(x_start, y_start, Paint.Width, y_start + Font.Height, WHITE); //清除一整行
+
+    }
+
+    if(refersh==EPD_2IN13_FULL)
+    {  
+        EPD_2IN13_Init(EPD_2IN13_FULL);
+        Paint_ClearWindows(0, TASKBARH_HIGH, Paint.Width, Paint.Height, WHITE);
+    } 
+    Paint_DrawString_EN(x_start, y_start, text, &Font, WHITE, BLACK);
+    EPD_2IN13_Display(BlackImage);
 }
-void ped_close(void)
-{
-    free(BlackImage);
-    DEV_Module_Exit();
-}
+
 
 void ped_app_start(void)
 {
-
     Imagesize = ((EPD_2IN13_WIDTH % 8 == 0)? (EPD_2IN13_WIDTH / 8 ): (EPD_2IN13_WIDTH / 8 + 1)) * EPD_2IN13_HEIGHT;
     if((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL) {
         ESP_LOGE(TAG,"Failed to apply for black memory...\r\n");
