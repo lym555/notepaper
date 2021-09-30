@@ -647,6 +647,13 @@
 /Users/apple/esp/notepaper/build/esp-idf/e-Paper/CMakeFiles/rebuild_cache.dir
 /Users/apple/esp/notepaper/build/esp-idf/e-Paper/CMakeFiles/edit_cache.dir
 /Users/apple/esp/notepaper/build/esp-idf/e-Paper/CMakeFiles/__idf_e-Paper.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/install/local.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/install/strip.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/install.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/list_install_components.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/__idf_tool.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/rebuild_cache.dir
+/Users/apple/esp/notepaper/build/esp-idf/tool/CMakeFiles/edit_cache.dir
 /Users/apple/esp/notepaper/build/esp-idf/mqtt_task/CMakeFiles/install/local.dir
 /Users/apple/esp/notepaper/build/esp-idf/mqtt_task/CMakeFiles/install/strip.dir
 /Users/apple/esp/notepaper/build/esp-idf/mqtt_task/CMakeFiles/install.dir

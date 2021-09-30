@@ -9,5 +9,7 @@
 #include <stdlib.h> // malloc() free()
 
 void ped_app_start(void);
-void ped_display_text(cJSON *json);
+void ped_display_text(char *json_str, uint16_t str_len);
+void ped_display_refresh(char *json_str, uint16_t str_len);
+void show_text(uint8_t x, uint8_t y, char *test);
 #endif

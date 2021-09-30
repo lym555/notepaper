@@ -71,6 +71,7 @@
 /Users/apple/esp/notepaper/build/esp-idf/Fonts/libFonts.a
 /Users/apple/esp/notepaper/build/esp-idf/GUI/libGUI.a
 /Users/apple/esp/notepaper/build/esp-idf/e-Paper/libe-Paper.a
+/Users/apple/esp/notepaper/build/esp-idf/tool/libtool.a
 /Users/apple/esp/notepaper/build/esp-idf/mqtt_task/libmqtt_task.a
 /Users/apple/esp/notepaper/build/esp-idf/cJSON/libcJSON.a
 /Users/apple/esp/notepaper/build/esp-idf/Examples/libExamples.a

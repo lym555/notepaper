@@ -25,9 +25,11 @@
 #include "mqtt_task.h"
 #include "mqtt_queue.h"
 
+#include "tool.h"
 
 static const char *TAG = "MQTT_EXAMPLE";
-static const char *SUB_TOPIC = "$baidu/iot/general/#";
+const char *SUB_TOPIC_REFRESH = "$baidu/iot/general/refresh";
+const char *SUB_TOPIC_DATA = "$baidu/iot/general/data";
 // static const char *PUB_TOPIC = "$baidu/iot/shadow/FAN/update";
 static const char *HOST = "39.156.69.88";
 static const char *USERNAME = "ujsf6w7/FAN";
@@ -39,7 +41,6 @@ static const uint16_t PORT = 1883;
 struct MQTTMessage *pxTxedMessage = NULL;
 QueueHandle_t xQueue = NULL;
 
-uint16_t message_id =0;
 
 void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -67,7 +68,8 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
     switch ((esp_mqtt_event_id_t)event_id) {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-        msg_id = esp_mqtt_client_subscribe(client, SUB_TOPIC, 0);
+        msg_id = esp_mqtt_client_subscribe(client, SUB_TOPIC_REFRESH, 0);
+        msg_id = esp_mqtt_client_subscribe(client, SUB_TOPIC_DATA, 0);
         ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -91,8 +93,9 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
+
         pxTxedMessage->data_type = QUEUE_TYPE_JSON;
-        pxTxedMessage->data_id = message_id++;
+        pxTxedMessage->topic = substring(event->topic,0,event->topic_len);
         pxTxedMessage->data_len = event->data_len;
         pxTxedMessage->data = event->data;
 

@@ -8,12 +8,15 @@
 
 #define QUEUE_TYPE_CONNECT_SUCCESS 0x00 //表示传输MQTT连接成功
 #define QUEUE_TYPE_JSON            0x01 //表示队列传输类型为JSON
+
 struct MQTTMessage
 {
     uint8_t data_type;  
-    uint16_t data_id;
+    uint8_t data_id;
     uint16_t data_len;
     char *data;
+    uint16_t topic_len;
+    char *topic;
 } xMessage;
 
 extern QueueHandle_t xQueue;

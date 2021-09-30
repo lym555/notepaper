@@ -57,8 +57,12 @@
 #define EPD_2IN13_WIDTH       122
 #define EPD_2IN13_HEIGHT      250
 
-#define EPD_2IN13_FULL			0
-#define EPD_2IN13_PART			1
+// #define EPD_2IN13_FULL			0
+// #define EPD_2IN13_PART			1
+enum{
+    EPD_2IN13_FULL = 0,
+    EPD_2IN13_PART
+};
 
 void EPD_2IN13_Init(UBYTE Mode);
 void EPD_2IN13_Clear(void);

@@ -1525,6 +1525,25 @@ rule C_STATIC_LIBRARY_LINKER____idf_e-Paper_
 #############################################
 # Rule for compiling C files.
 
+rule C_COMPILER____idf_tool_
+  depfile = $DEP_FILE
+  deps = gcc
+  command = /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building C object $out
+
+
+#############################################
+# Rule for linking C static library.
+
+rule C_STATIC_LIBRARY_LINKER____idf_tool_
+  command = $PRE_LINK && /usr/local/Cellar/cmake/3.21.2/bin/cmake -E rm -f $TARGET_FILE && /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc $TARGET_FILE $LINK_FLAGS $in && /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib $TARGET_FILE && /usr/local/Cellar/cmake/3.21.2/bin/cmake -E touch $TARGET_FILE && $POST_BUILD
+  description = Linking C static library $TARGET_FILE
+  restat = $RESTAT
+
+
+#############################################
+# Rule for compiling C files.
+
 rule C_COMPILER____idf_mqtt_task_
   depfile = $DEP_FILE
   deps = gcc

@@ -15,7 +15,15 @@
 			"string": "c",
 			"string_view": "c",
 			"functional": "c",
-			"freertos.h": "c"
+			"freertos.h": "c",
+			"chrono": "c",
+			"istream": "c",
+			"ostream": "c",
+			"ratio": "c",
+			"tuple": "c",
+			"type_traits": "c",
+			"utility": "c",
+			"gui_paint.h": "c"
 		}
 	}
 }
