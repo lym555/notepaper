@@ -37,6 +37,9 @@
 #include "ImageData.h"
 #include "cJSON.h"
 
+void time_init_display(void);
+
+
 static portTickType xLastWakeTime;
 
 static const uint8_t TASKBARH_HIGH = 16;
@@ -50,6 +53,7 @@ UBYTE *BlackImage;
 /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
 UWORD Imagesize = 0;
 
+
 void time_Task(void *pvParameters)
 {
     sFONT Font = Font16;
@@ -59,9 +63,9 @@ void time_Task(void *pvParameters)
     xLastWakeTime = xTaskGetTickCount(); //获取计数
     EPD_2IN13_Init(EPD_2IN13_PART);      //局部刷新
     Paint_SelectImage(BlackImage);       //选择图像存储空间
-    PAINT_TIME sPaint_time;
-    sPaint_time.Hour = 12;
-    sPaint_time.Min = 34;
+    // PAINT_TIME sPaint_time;
+    // sPaint_time.Hour = 12;
+    // sPaint_time.Min = 34;
     while (1)
     {
         EPD_2IN13_Init(EPD_2IN13_PART); //局部刷新
@@ -239,7 +243,24 @@ void EPD_init(void)
     DEV_Delay_ms(500);
     Paint_NewImage(BlackImage, EPD_2IN13_WIDTH, EPD_2IN13_HEIGHT, 270, WHITE);
     Paint_Clear(WHITE);
-    Paint_DrawBitMapFree(gImage_disconnect, 250 - 16, 0, 16, 16);
+    
+    time_init_display();
+    Paint_DrawBitMapFree(gImage_disconnect, 250 - 16, 0, 16, 16);           // Wi-Fi
+
+    EPD_2IN13_Display(BlackImage);
+}
+
+void time_init_display(void)
+{
+    sFONT Font = Font16;
+    uint8_t content_len = 5; // 时间显示占5个字
+    uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
+    uint8_t start_y = 0;
+    // PAINT_TIME sPaint_time;
+    sPaint_time.Hour = 00;
+    sPaint_time.Min = 00;
+    Paint_SelectImage(BlackImage);       //选择图像存储空间
+    Paint_DrawTime(start_x, start_y, &sPaint_time, &Font, WHITE, BLACK);    // 时间
 }
 
 void EPD_start(void)

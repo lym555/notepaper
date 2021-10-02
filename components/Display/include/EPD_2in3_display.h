@@ -8,6 +8,10 @@
 #include "Debug.h"
 #include <stdlib.h> // malloc() free()
 
+
+PAINT_TIME sPaint_time;
+
+
 void EPD_init(void);
 void EPD_start(void);
 void EPD_display_text(char *json_str, uint16_t str_len);

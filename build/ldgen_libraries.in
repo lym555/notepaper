@@ -75,4 +75,5 @@ $<TARGET_FILE:__idf_tool>
 $<TARGET_FILE:__idf_mqtt_task>
 $<TARGET_FILE:__idf_cJSON>
 $<TARGET_FILE:__idf_Display>
+$<TARGET_FILE:__idf_NTP>
 $<TARGET_FILE:__idf_main>

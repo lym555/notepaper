@@ -123,6 +123,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/Users/apple/esp/notepaper/build/esp-idf/mqtt_task/cmake_install.cmake")
   include("/Users/apple/esp/notepaper/build/esp-idf/cJSON/cmake_install.cmake")
   include("/Users/apple/esp/notepaper/build/esp-idf/Display/cmake_install.cmake")
+  include("/Users/apple/esp/notepaper/build/esp-idf/NTP/cmake_install.cmake")
   include("/Users/apple/esp/notepaper/build/esp-idf/main/cmake_install.cmake")
 
 endif()

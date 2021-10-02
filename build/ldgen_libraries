@@ -75,4 +75,5 @@
 /Users/apple/esp/notepaper/build/esp-idf/mqtt_task/libmqtt_task.a
 /Users/apple/esp/notepaper/build/esp-idf/cJSON/libcJSON.a
 /Users/apple/esp/notepaper/build/esp-idf/Display/libDisplay.a
+/Users/apple/esp/notepaper/build/esp-idf/NTP/libNTP.a
 /Users/apple/esp/notepaper/build/esp-idf/main/libmain.a
