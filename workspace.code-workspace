@@ -23,7 +23,10 @@
 			"tuple": "c",
 			"type_traits": "c",
 			"utility": "c",
-			"gui_paint.h": "c"
+			"gui_paint.h": "c",
+			"initializer_list": "c",
+			"*.ipp": "c",
+			"random": "c"
 		}
 	}
 }
