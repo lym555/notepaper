@@ -34,6 +34,7 @@
 // extern const unsigned char gImage_2in13[];
 extern const unsigned char gImage_disconnect[32];
 extern const unsigned char gImage_connect[32];
+const unsigned char gImage_battery_half[32];
 #endif
 /* FILE END */
 

@@ -224,6 +224,12 @@ void show_text(uint8_t x, uint8_t y, char *text)
     free(show_text);//释放内存
 }
 
+
+// void ped_app_init(void)
+// {
+
+// }
+
 void ped_app_start(void)
 {
     Imagesize = ((EPD_2IN13_WIDTH % 8 == 0) ? (EPD_2IN13_WIDTH / 8) : (EPD_2IN13_WIDTH / 8 + 1)) * EPD_2IN13_HEIGHT;
