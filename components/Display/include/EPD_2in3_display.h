@@ -10,7 +10,7 @@
 
 
 PAINT_TIME sPaint_time;
-
+extern uint8_t NPT_FLAG;
 
 void EPD_init(void);
 void EPD_start(void);

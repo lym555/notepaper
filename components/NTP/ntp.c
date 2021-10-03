@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "ntp.h"
+#include "EPD_2in3_display.h"
 /* HTTP GET Example using plain POSIX sockets
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
@@ -23,7 +24,13 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 
+#include <string.h>
+#include "cJSON.h"
+#include "timestamp.h"
+#include "math.h"
+
 TaskHandle_t timeHandle=NULL;
+void update_time(char *json_str);
 
 /* Constants that aren't configurable in menuconfig */
 #define WEB_SERVER "api.m.taobao.com"
@@ -46,7 +53,7 @@ static void http_get_task(void *pvParameters)
     struct addrinfo *res;
     struct in_addr *addr;
     int s, r;
-    char recv_buf[128];
+    char recv_buf[1024];
 
     while(1) {
         int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
@@ -103,22 +110,85 @@ static void http_get_task(void *pvParameters)
         }
         ESP_LOGI(TAG, "... set socket receiving timeout success");
 
+        bzero(recv_buf, sizeof(recv_buf));
+        uint16_t count_recv = 0;
         /* Read HTTP response */
         do {
-            bzero(recv_buf, sizeof(recv_buf));
+            
             r = read(s, recv_buf, sizeof(recv_buf)-1);
             for(int i = 0; i < r; i++) {
-                putchar(recv_buf[i]);
+                if((recv_buf[i] == '{') && (count_recv == 0))
+                    count_recv = i;
+                if (count_recv > 0)
+                {
+                    recv_buf[(i-count_recv)] = recv_buf[i];                 
+                    // putchar(recv_buf[i-count_recv]);
+                }
+                
             }
-        } while(r > 0);
+            recv_buf[r-count_recv] = '\0';
 
+        } while(r > 0);
+       
+        // ESP_LOGI(TAG, "Json data = %s\r\n",recv_buf);
+
+        update_time(recv_buf);
+        
+        
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
-        ESP_LOGI(TAG, "Starting again!");
+        
         vTaskDelete(timeHandle);
     }
 }
+uint8_t strcup(char *dst, char *src, uint16_t cp_start, uint16_t cp_size)
+{
+    char *p = dst;
+    char *q = src+cp_start;
+    uint16_t size = strlen(src);
+    if ((cp_start+cp_size) > size)
+        return 0;
+
+    while (cp_size--)
+    {
+        *(p++)=*(q++);
+    }
+    *(p++) = '\0';
+
+    return 1;
+
+}
+
+void update_time(char *json_str)
+{
+    cJSON *root = NULL;
+    cJSON *item = NULL;
+    root = cJSON_Parse(json_str);
+    item = cJSON_GetObjectItem(root, "data");
+
+    char* time_sta = cJSON_GetObjectItem(item, "t")->valuestring;
+    *(time_sta+10) = '\0';
+
+    uint64_t time_u64 = atol(time_sta);
+    // printf("ti = %llu\r\n", time_u64);
+
+
+    timestamp_t ts={time_u64,0,0};;
+    char buf[40];
+    timestamp_format(buf, sizeof(buf), &ts);
+    // printf("time = %s\r\n", buf);
+    char time_s[2];
+    strcup(time_s,buf,11,2);
+    sPaint_time.Hour = atoi(time_s)+8;
+    strcup(time_s,buf,14,2);
+    sPaint_time.Min = atoi(time_s);
+
+    NPT_FLAG = 1;   //网络对时标志
+    cJSON_Delete(root); //删除最外层即可
+}
+
 void ntp_start(void)
 {
-    xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, &timeHandle);
+    xTaskCreate(&http_get_task, "http_get_task", 4096*2, NULL, 5, &timeHandle);
 }
+

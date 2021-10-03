@@ -39,10 +39,10 @@
 
 void time_init_display(void);
 
-
 static portTickType xLastWakeTime;
 
 static const uint8_t TASKBARH_HIGH = 16;
+uint8_t NPT_FLAG = 0;
 static const char *TAG = "EPD_2IN13_TEST";
 char *data = "";
 
@@ -52,7 +52,6 @@ TaskHandle_t xContentTask = NULL;
 UBYTE *BlackImage;
 /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
 UWORD Imagesize = 0;
-
 
 void time_Task(void *pvParameters)
 {
@@ -68,7 +67,14 @@ void time_Task(void *pvParameters)
     // sPaint_time.Min = 34;
     while (1)
     {
-        EPD_2IN13_Init(EPD_2IN13_PART); //局部刷新
+        if (NPT_FLAG == 0)
+            EPD_2IN13_Init(EPD_2IN13_PART); //局部刷新
+        if (NPT_FLAG == 1)
+        {
+            EPD_2IN13_Init(EPD_2IN13_FULL); //全局刷新
+            NPT_FLAG = 0;
+        }
+
         sPaint_time.Min = sPaint_time.Min + 1;
         if (sPaint_time.Min == 60)
         {
@@ -210,10 +216,10 @@ void show_text(uint8_t x, uint8_t y, char *text)
     /*判断是否可以完整显示*/
     int8_t show_max_len = x_max - (x + text_len);
     if (show_max_len < 0)
-        text_len = x_max - x_start + 1;         
+        text_len = x_max - x_start + 1;
     char *show_text = (char *)malloc((text_len + 1) * sizeof(char));
     strncpy(show_text, text, text_len);
-    show_text[text_len] = '\0';     //结束字符
+    show_text[text_len] = '\0'; //结束字符
     printf("show_text = %s;len = %d\r\n", show_text, strlen(show_text));
 
     /*计算起点像素点*/
@@ -225,9 +231,8 @@ void show_text(uint8_t x, uint8_t y, char *text)
     Paint_ClearWindows(x_start, y_start, x_start + Font.Width * text_len, y_start + Font.Height, WHITE);
     Paint_DrawString_EN(x_start, y_start, show_text, &Font, WHITE, BLACK);
     EPD_2IN13_Display(BlackImage);
-    free(show_text);//释放内存
+    free(show_text); //释放内存
 }
-
 
 void EPD_init(void)
 {
@@ -243,9 +248,9 @@ void EPD_init(void)
     DEV_Delay_ms(500);
     Paint_NewImage(BlackImage, EPD_2IN13_WIDTH, EPD_2IN13_HEIGHT, 270, WHITE);
     Paint_Clear(WHITE);
-    
+
     time_init_display();
-    Paint_DrawBitMapFree(gImage_disconnect, 250 - 16, 0, 16, 16);           // Wi-Fi
+    Paint_DrawBitMapFree(gImage_disconnect, 250 - 16, 0, 16, 16); // Wi-Fi
 
     EPD_2IN13_Display(BlackImage);
 }
@@ -259,8 +264,8 @@ void time_init_display(void)
     // PAINT_TIME sPaint_time;
     sPaint_time.Hour = 00;
     sPaint_time.Min = 00;
-    Paint_SelectImage(BlackImage);       //选择图像存储空间
-    Paint_DrawTime(start_x, start_y, &sPaint_time, &Font, WHITE, BLACK);    // 时间
+    Paint_SelectImage(BlackImage);                                       //选择图像存储空间
+    Paint_DrawTime(start_x, start_y, &sPaint_time, &Font, WHITE, BLACK); // 时间
 }
 
 void EPD_start(void)

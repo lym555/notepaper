@@ -28,7 +28,9 @@
 			"*.ipp": "c",
 			"random": "c",
 			"epd_2in3_display.h": "c",
-			"ntp.h": "c"
+			"ntp.h": "c",
+			"*.tcc": "c",
+			"cstring": "c"
 		}
 	}
 }

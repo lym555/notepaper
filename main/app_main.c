@@ -28,9 +28,10 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(example_connect());     //http 需要
-    ntp_start();
 
     EPD_start();
+    
+    ntp_start();
     mqtt_app_start();
 
     while (1)
