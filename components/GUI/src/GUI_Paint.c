@@ -809,20 +809,19 @@ void Paint_DrawBitMap_Block(const unsigned char* image_buffer, UBYTE Region)
 
 void Paint_DrawBitMapFree(const unsigned char* image_buffer, UWORD x, UWORD y, UWORD w, UWORD h )
 {
-
     x = (x>(Paint.Width-w))?(Paint.Width-w) : x;
     y = (y>(Paint.Height-h))?(Paint.Height-h) : y;
-    x = Paint.Width - x - w ;
-    // printf("y = %d\r\n",y);
+    x = Paint.Width - x - w;
+
+    // printf("%d,%d,%d\r\n",x,y,Paint.Width);
     UDOUBLE Addr = 0;
-    UWORD wb = (w+7) / 8;
-    for (UWORD yi =0; yi < h ; yi++)
+    UWORD hb = (h+7) / 8;
+    for (UWORD xi =0; xi < w ; xi++)
     {
-        for (UWORD xi = 0; xi < wb ; xi++)
+        for (UWORD yi = 0; yi < hb ; yi++)
         {
-            Addr = (y + xi) + (x+yi) * Paint.WidthByte;
-            Paint.Image[Addr] = (unsigned char)image_buffer[xi+yi*wb];
+            Addr = (x*Paint.WidthByte) + (yi + xi * Paint.WidthByte) + (y/8);
+            Paint.Image[Addr] = (unsigned char)image_buffer[yi+xi*hb];
         }
-        
     }
 }
