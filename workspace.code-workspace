@@ -30,7 +30,11 @@
 			"epd_2in3_display.h": "c",
 			"ntp.h": "c",
 			"*.tcc": "c",
-			"cstring": "c"
+			"cstring": "c",
+			"stdlib.h": "c",
+			"cjson.h": "c",
+			"future": "c",
+			"system_error": "c"
 		}
 	}
 }

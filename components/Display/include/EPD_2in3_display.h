@@ -11,7 +11,7 @@
 
 PAINT_TIME sPaint_time;
 extern uint8_t NPT_FLAG;
-
+extern UBYTE *BlackImage;
 void EPD_init(void);
 void EPD_start(void);
 void EPD_display_text(char *json_str, uint16_t str_len);

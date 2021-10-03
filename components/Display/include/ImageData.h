@@ -35,6 +35,11 @@
 extern const unsigned char gImage_disconnect[32];
 extern const unsigned char gImage_connect[32];
 const unsigned char gImage_battery_half[32];
+const unsigned char gImage_battery_empty[32];
+const unsigned char gImage_battery_full[32];
+const unsigned char gImage_battery_charging[32];
+
+const unsigned char gImage_clear[128];
 #endif
 /* FILE END */
 

@@ -16,6 +16,6 @@
 // extern QueueHandle_t xQueue;
 extern const char *SUB_TOPIC_DATA;
 extern const char *SUB_TOPIC_REFRESH;
-void mqtt_app_start(void);
+void mqtt_start(void);
 
 #endif

@@ -138,7 +138,7 @@ static void http_get_task(void *pvParameters)
         ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
         close(s);
         
-        vTaskDelete(timeHandle);
+        vTaskDelete(timeHandle);    //删除此任务
     }
 }
 uint8_t strcup(char *dst, char *src, uint16_t cp_start, uint16_t cp_size)

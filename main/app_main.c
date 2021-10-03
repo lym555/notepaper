@@ -17,6 +17,7 @@
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
+#include "weather.h"
 
 void app_main(void)
 {
@@ -30,10 +31,9 @@ void app_main(void)
     ESP_ERROR_CHECK(example_connect());     //http 需要
 
     EPD_start();
-    
     ntp_start();
-    mqtt_app_start();
-
+    mqtt_start();
+    weather_start();
     while (1)
     {
         printf("Main ...\r\n");

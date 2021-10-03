@@ -682,6 +682,13 @@
 /Users/apple/esp/notepaper/build/esp-idf/NTP/CMakeFiles/rebuild_cache.dir
 /Users/apple/esp/notepaper/build/esp-idf/NTP/CMakeFiles/edit_cache.dir
 /Users/apple/esp/notepaper/build/esp-idf/NTP/CMakeFiles/__idf_NTP.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/install/local.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/rebuild_cache.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/edit_cache.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/install/strip.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/install.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/list_install_components.dir
+/Users/apple/esp/notepaper/build/esp-idf/weather/CMakeFiles/__idf_weather.dir
 /Users/apple/esp/notepaper/build/esp-idf/main/CMakeFiles/install/local.dir
 /Users/apple/esp/notepaper/build/esp-idf/main/CMakeFiles/__idf_main.dir
 /Users/apple/esp/notepaper/build/esp-idf/main/CMakeFiles/rebuild_cache.dir

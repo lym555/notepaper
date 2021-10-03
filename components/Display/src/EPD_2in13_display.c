@@ -57,7 +57,8 @@ void time_Task(void *pvParameters)
 {
     sFONT Font = Font16;
     uint8_t content_len = 5; // 时间显示占5个字
-    uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
+    // uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
+    uint8_t start_x = 0;
     uint8_t start_y = 0;
     xLastWakeTime = xTaskGetTickCount(); //获取计数
     EPD_2IN13_Init(EPD_2IN13_PART);      //局部刷新
@@ -110,8 +111,8 @@ void content_Task(void *pvParameters)
             /*订阅成功说明Wi-Fi连接没问题，更新Wi-Fi图标*/
             if (pxRxedMessage->data_type == QUEUE_TYPE_CONNECT_SUCCESS)
             {
-                Paint_ClearWindows(250 - 16, 0, 16, 16, WHITE);
-                Paint_DrawBitMapFree(gImage_connect, 250 - 16, 0, 16, 16);
+                Paint_ClearWindows(Paint.Width - 18*2, 0, 16, 16, WHITE);
+                Paint_DrawBitMapFree(gImage_connect, Paint.Width - 18*2, 0, 16, 16);
                 EPD_2IN13_Display(BlackImage);
                 printf("wifi connect success\r\n");
                 continue;
@@ -250,7 +251,8 @@ void EPD_init(void)
     Paint_Clear(WHITE);
 
     time_init_display();
-    Paint_DrawBitMapFree(gImage_disconnect, 250 - 16, 0, 16, 16); // Wi-Fi
+    Paint_DrawBitMapFree(gImage_battery_half,Paint.Width-18,0,16,16);
+    Paint_DrawBitMapFree(gImage_disconnect, Paint.Width - 18*2, 0, 16, 16); // Wi-Fi
 
     EPD_2IN13_Display(BlackImage);
 }
@@ -259,7 +261,7 @@ void time_init_display(void)
 {
     sFONT Font = Font16;
     uint8_t content_len = 5; // 时间显示占5个字
-    uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
+    uint8_t start_x = 0;
     uint8_t start_y = 0;
     // PAINT_TIME sPaint_time;
     sPaint_time.Hour = 00;
