@@ -27,7 +27,9 @@
 
 #define WEB_SERVER "devapi.qweather.com"
 #define WEB_PORT "80"
-#define WEB_URL "https://devapi.qweather.com/v7/weather/now?location=117.282488,31.775297&key=9e54b1e3d00e4f36b813065e30b0eec7&gzip=n&lang=en"
+// #define WEB_URL "https://devapi.qweather.com/v7/weather/now?location=117.282488,31.775297&key=9e54b1e3d00e4f36b813065e30b0eec7&gzip=n&lang=en"
+#define WEB_URL "https://devapi.qweather.com/v7/weather/3d?location=117.282488,31.775297&key=9e54b1e3d00e4f36b813065e30b0eec7&gzip=n&lang=en"
+
 static const char *TAG = "example";
 
 static const char REQUEST[] = "GET " WEB_URL " HTTP/1.1\r\n"
@@ -44,10 +46,15 @@ static void EPD_display_weather(char *json_str)
     cJSON *root = NULL;
     cJSON *item = NULL;
     root = cJSON_Parse(json_str);
+    printf("%s\r\n", cJSON_Print(root));
+    /*>
     char* code = cJSON_GetObjectItem(root, "code")->valuestring;
     if (strcmp("200",code) == 0)
     {
-        item = cJSON_GetObjectItem(root, "now");
+        
+        item = cJSON_GetObjectItem(root, "daily");
+        printf("%s\r\n", cJSON_Print(item));
+        
         char* temp = cJSON_GetObjectItem(item, "temp")->valuestring;           //温度
 
         char* icon = cJSON_GetObjectItem(item, "icon")->valuestring;          //图标
@@ -66,23 +73,24 @@ static void EPD_display_weather(char *json_str)
         
         char show_temp[32]="temp:";
         strcat(show_temp,temp);
-        Paint_DrawString_EN(0, Font.Height, show_temp, &Font, WHITE, BLACK);
+        Paint_DrawString_EN(0, Font.Height*1.5, show_temp, &Font, WHITE, BLACK);
 
         char show_humidity[32]="humidity:";
         strcat(show_humidity,humidity);
-        Paint_DrawString_EN(0, Font.Height*2, show_humidity, &Font, WHITE, BLACK);
+        Paint_DrawString_EN(0, Font.Height*3, show_humidity, &Font, WHITE, BLACK);
 
         // char show_weather[32]="weather:";
         // strcat(show_weather,text);
         // Paint_DrawString_EN(0, Font.Height, show_weather, &Font, WHITE, BLACK);
 
-
+        Paint_DrawBitMapFree(gImage_clear, 250-32-32, 24, 32, 32);
+        
     }
     else
     {
         Paint_DrawString_EN(0, 16, "weather error", &Font16, WHITE, BLACK);
     }
-
+    */
     // Paint_DrawNum(0,16*2,temp, &Font16, WHITE, BLACK);
     // Paint_DrawNum(0,16*3,123, &Font16, WHITE, BLACK);
 
@@ -95,7 +103,7 @@ static void EPD_display_weather(char *json_str)
 
 static void https_get_request(esp_tls_cfg_t cfg)
 {
-    char buf[1024];
+    char buf[2048];
     int ret, len;
 
     struct esp_tls *tls = esp_tls_conn_http_new(WEB_URL, &cfg);

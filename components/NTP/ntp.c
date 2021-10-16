@@ -180,6 +180,10 @@ void update_time(char *json_str)
     char time_s[2];
     strcup(time_s,buf,11,2);
     sPaint_time.Hour = atoi(time_s)+8;
+    if (sPaint_time.Hour>=24)
+    {
+        sPaint_time.Hour -= 24;
+    }
     strcup(time_s,buf,14,2);
     sPaint_time.Min = atoi(time_s);
 
