@@ -44,7 +44,7 @@ static void EPD_display_weather(char *json_str)
 {
 
     cJSON *root = NULL;
-    cJSON *item = NULL;
+    // cJSON *item = NULL;
     root = cJSON_Parse(json_str);
     printf("%s\r\n", cJSON_Print(root));
     /*>

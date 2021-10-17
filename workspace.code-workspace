@@ -34,7 +34,8 @@
 			"stdlib.h": "c",
 			"cjson.h": "c",
 			"future": "c",
-			"system_error": "c"
+			"system_error": "c",
+			"coap_weather.h": "c"
 		}
 	}
 }

@@ -19,6 +19,8 @@
 #include "lwip/netdb.h"
 #include "weather.h"
 
+#include "coap_weather.h"
+
 void app_main(void)
 {
     GPIO_Init();
@@ -28,12 +30,14 @@ void app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    ESP_ERROR_CHECK(example_connect());     //http 需要
+    ESP_ERROR_CHECK(example_connect());    
 
     EPD_start();
-    ntp_start();
     mqtt_start();
-    weather_start();
+
+    // ntp_start();
+    // weather_start();
+    coap_main();
     while (1)
     {
         printf("Main ...\r\n");
