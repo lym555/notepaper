@@ -1620,7 +1620,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_NTP_
 #############################################
 # Rule for compiling ASM files.
 
-rule ASM_COMPILER____idf_coap_weather_
+rule ASM_COMPILER____idf_coap_client_
   depfile = $DEP_FILE
   deps = gcc
   command = /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -1630,7 +1630,7 @@ rule ASM_COMPILER____idf_coap_weather_
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER____idf_coap_weather_
+rule C_COMPILER____idf_coap_client_
   depfile = $DEP_FILE
   deps = gcc
   command = /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -1640,7 +1640,7 @@ rule C_COMPILER____idf_coap_weather_
 #############################################
 # Rule for linking C static library.
 
-rule C_STATIC_LIBRARY_LINKER____idf_coap_weather_
+rule C_STATIC_LIBRARY_LINKER____idf_coap_client_
   command = $PRE_LINK && /usr/local/Cellar/cmake/3.21.2/bin/cmake -E rm -f $TARGET_FILE && /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc $TARGET_FILE $LINK_FLAGS $in && /Users/apple/.espressif/tools/riscv32-esp-elf/1.24.0.123_64eb9ff-8.4.0/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib $TARGET_FILE && /usr/local/Cellar/cmake/3.21.2/bin/cmake -E touch $TARGET_FILE && $POST_BUILD
   description = Linking C static library $TARGET_FILE
   restat = $RESTAT

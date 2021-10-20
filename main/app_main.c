@@ -19,28 +19,32 @@
 #include "lwip/netdb.h"
 #include "weather.h"
 
-#include "coap_weather.h"
+#include "coap_client.h"
+
 
 void app_main(void)
 {
-    GPIO_Init();
-    SPI_Init();
-    EPD_init();
+    // GPIO_Init();
+    // SPI_Init();
+    // EPD_init();
 
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(example_connect());    
 
-    EPD_start();
-    mqtt_start();
+    // EPD_start();
+    // mqtt_start();
 
     // ntp_start();
     // weather_start();
-    coap_main();
+
+    get_ntp();
+    get_weather_3d();
+    get_weather_now();
     while (1)
     {
         printf("Main ...\r\n");
-        vTaskDelay(5000 / portTICK_RATE_MS);
+        vTaskDelay(30*1000 / portTICK_RATE_MS);
     }
 }

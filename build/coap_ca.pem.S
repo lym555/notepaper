@@ -1,4 +1,4 @@
-/* * Data converted from /Users/apple/esp/notepaper/components/coap_weather/certs/coap_ca.pem
+/* * Data converted from /Users/apple/esp/notepaper/components/coap_client/certs/coap_ca.pem
  * (null byte appended)
  */
 .data

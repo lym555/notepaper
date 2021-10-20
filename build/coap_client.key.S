@@ -1,4 +1,4 @@
-/* * Data converted from /Users/apple/esp/notepaper/components/coap_weather/certs/coap_client.key
+/* * Data converted from /Users/apple/esp/notepaper/components/coap_client/certs/coap_client.key
  * (null byte appended)
  */
 .data
