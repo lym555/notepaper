@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include "esp_wifi.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
@@ -23,7 +24,7 @@
 #include "mqtt_client.h"
 
 #include "mqtt_task.h"
-#include "mqtt_queue.h"
+#include "epd_queue.h"
 
 #include "tool.h"
 
@@ -38,8 +39,8 @@ static const char *CLIENT_ID = "FAN";
 static const uint16_t PORT = 1883;
 
 
-struct MQTTMessage *pxTxedMessage = NULL;
-QueueHandle_t xQueue = NULL;
+epdMessage *pxTxedMessage = NULL;
+// QueueHandle_t epdQueue = NULL;
 
 
 void log_error_if_nonzero(const char *message, int error_code)
@@ -78,10 +79,6 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
 
     case MQTT_EVENT_SUBSCRIBED:
         ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
-        pxTxedMessage->data_type = QUEUE_TYPE_CONNECT_SUCCESS;
-        xQueueSend( xQueue, ( void * ) pxTxedMessage, ( TickType_t ) 0 );
-        // msg_id = esp_mqtt_client_publish(client, "/topic/qos0", "data", 0, 0, 0);
-        // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         break;
     case MQTT_EVENT_UNSUBSCRIBED:
         ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
@@ -91,15 +88,17 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
         break;
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
-
-        pxTxedMessage->data_type = QUEUE_TYPE_JSON;
+        // printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+        // printf("DATA=%.*s\r\n", event->data_len, event->data);
+        pxTxedMessage = (epdMessage*) malloc(sizeof(epdMessage));
+        pxTxedMessage->data_type = QUEUE_TYPE_MQTT;
         pxTxedMessage->topic = substring(event->topic,0,event->topic_len);
         pxTxedMessage->data_len = event->data_len;
         pxTxedMessage->data = event->data;
 
-        xQueueSend( xQueue, ( void * ) pxTxedMessage, ( TickType_t ) 0 );
+        xQueueSend( epdQueue, ( void * ) pxTxedMessage, ( TickType_t ) 0 );
+        // free(pxTxedMessage);
+
         ESP_LOGI(TAG,"将接受的内容发送到队列");
         break;
     case MQTT_EVENT_ERROR:
@@ -132,12 +131,12 @@ void mqtt_start(void)
     esp_log_level_set("OUTBOX", ESP_LOG_VERBOSE);
 
  
-    xQueue = xQueueCreate( QUEUE_LEN, sizeof( struct MQTTMessage * ) );
-    if( NULL == xQueue )
-    {
-        ESP_LOGE(TAG,"创建Queue消息队列失败\r\n");
-    }
-    pxTxedMessage = &xMessage;
+    // epdQueue = xQueueCreate( QUEUE_LEN, sizeof( struct MQTTMessage * ) );
+    // if( NULL == epdQueue )
+    // {
+    //     ESP_LOGE(TAG,"创建Queue消息队列失败\r\n");
+    // }
+    // pxTxedMessage = &epdMessage;
     // ESP_ERROR_CHECK(example_connect());
     esp_mqtt_client_config_t mqtt_cfg = {
         .host = HOST,

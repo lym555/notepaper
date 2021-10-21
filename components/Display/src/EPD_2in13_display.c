@@ -1,134 +1,186 @@
-/*****************************************************************************
-* | File      	:   EPD_2IN13_test.c
-* | Author      :   Waveshare team
-* | Function    :   2.9inch e-paper test demo
-* | Info        :
-*----------------
-* |	This version:   V1.0
-* | Date        :   2019-06-11
-* | Info        :
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documnetation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to  whom the Software is
-# furished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-#
-******************************************************************************/
 #include "EPD_2in3_display.h"
 #include "EPD_2in13.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
-#include "mqtt_queue.h"
+#include "epd_queue.h"
 #include "mqtt_task.h"
 #include "ImageData.h"
 #include "cJSON.h"
+#include "coap_client.h"
 
-void time_init_display(void);
+// void time_init_display(void);
 
-static portTickType xLastWakeTime;
-
-static const uint8_t TASKBARH_HIGH = 16;
+/**>时间显示的坐标和长度*/
 uint8_t NPT_FLAG = 0;
+
 static const char *TAG = "EPD_2IN13_TEST";
 char *data = "";
 
 TaskHandle_t xTimeTask = NULL;
 TaskHandle_t xContentTask = NULL;
+QueueHandle_t epdQueue = NULL;
 //Create a new image cache
 UBYTE *BlackImage;
 /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
 UWORD Imagesize = 0;
 
+static void paint_degrees_icon(uint8_t x, uint8_t y, sFONT *Font)
+{
+    Paint_DrawCircle(x, y + 4, 2, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+    Paint_DrawString_EN(x + 2, y, "C", Font, WHITE, BLACK);
+}
+
+void EPD_display_weather_now()
+{
+    printf("weather_now.code = %s\r\n", weather_now.code);
+     printf("weather_now.text = %s\r\n", weather_now.text);
+    uint8_t x_start = 10;
+    uint8_t y_start = 32;
+    // /**>当前温度*/
+    // Paint_ClearWindows(x_start, y_start,x_start+Font24.Width * strlen(weather_now.temp),y_start+Font24.Height,WHITE);
+    Paint_DrawString_EN(x_start, y_start, weather_now.temp, &Font24, WHITE, BLACK);
+    x_start += Font24.Width * strlen(weather_now.temp) + INTERVAL;
+    paint_degrees_icon(x_start, y_start, &Font24);
+
+    /**>当前天气*/
+    x_start = 10;
+    y_start += Font24.Height + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start, weather_now.text, &Font12, WHITE, BLACK);
+    EPD_2IN13_Display(BlackImage);
+    printf("更新当前天气\r\n");
+
+        /**>湿度*/
+    y_start = Paint.Height - Font16.Height;
+    Paint_DrawBitMapFree(gImage_humidity_16, x_start, y_start, 16, 16);
+    x_start += 16 ;
+
+    strcat(weather_now.humidity,"%");
+    Paint_DrawString_EN(x_start, y_start+2, weather_now.humidity, &Font12, WHITE, BLACK);
+    /**>温度上限*/
+    x_start = wind_width / 3*2;
+    Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, "30", &Font12, WHITE, BLACK);
+
+
+    /**>温度下限*/
+    x_start = wind_width / 3 + 8;
+    Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, "20", &Font12, WHITE, BLACK);
+
+    /**>当前天气图标*/
+    x_start = wind_width - 48 - 8;
+    y_start = 24;
+    Paint_DrawBitMapFree(gImage_cloudy_48, x_start, y_start, 48, 48); //天气图标
+
+    
+}
+
+static void EPD_display_weather_3d()
+{
+    printf("更新未来3天气\r\n");
+}
+
 void time_Task(void *pvParameters)
 {
+    static portTickType xLastWakeTime;
+    uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
+    uint8_t TIME_Y = 0;
     sFONT Font = Font16;
-    uint8_t content_len = 5; // 时间显示占5个字
+
     // uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
-    uint8_t start_x = 0;
-    uint8_t start_y = 0;
     xLastWakeTime = xTaskGetTickCount(); //获取计数
     EPD_2IN13_Init(EPD_2IN13_PART);      //局部刷新
     Paint_SelectImage(BlackImage);       //选择图像存储空间
-    // PAINT_TIME sPaint_time;
-    // sPaint_time.Hour = 12;
-    // sPaint_time.Min = 34;
     while (1)
     {
-        if (NPT_FLAG == 0)
-            EPD_2IN13_Init(EPD_2IN13_PART); //局部刷新
         if (NPT_FLAG == 1)
         {
             EPD_2IN13_Init(EPD_2IN13_FULL); //全局刷新
+
+            /*绘制月份*/
+            Paint_ClearWindows(0, 0, TIME_FONT_WIDTH * TIME_LEN, TIME_FONT_HEIGHT, WHITE);
+            Paint_DrawTime_Month(0, 0, &sPaint_time, &Font, WHITE, BLACK);
+
+            Paint_ClearWindows(TIME_X, TIME_Y, TIME_X + TIME_FONT_WIDTH * TIME_LEN, TIME_Y + TIME_FONT_HEIGHT, WHITE);
+            Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font, WHITE, BLACK);
+            EPD_2IN13_Display(BlackImage);
             NPT_FLAG = 0;
         }
-
-        sPaint_time.Min = sPaint_time.Min + 1;
-        if (sPaint_time.Min == 60)
+        sPaint_time.Sec = sPaint_time.Sec + 1;
+        if (sPaint_time.Sec == 60)
         {
-            sPaint_time.Hour = sPaint_time.Hour + 1;
-            sPaint_time.Min = 0;
-            if (sPaint_time.Hour == 24)
+            sPaint_time.Min = sPaint_time.Min + 1;
+            sPaint_time.Sec = 0;
+            if (sPaint_time.Min == 60)
             {
-                sPaint_time.Hour = 0;
+                sPaint_time.Hour = sPaint_time.Hour + 1;
                 sPaint_time.Min = 0;
+                if (sPaint_time.Hour == 24)
+                {
+                    sPaint_time.Hour = 0;
+                    sPaint_time.Min = 0;
+                    sPaint_time.Sec = 0;
+                }
             }
         }
-        Paint_ClearWindows(start_x, start_y, start_x + Font.Width * content_len, start_y + Font.Height, WHITE);
-        Paint_DrawTime(start_x, start_y, &sPaint_time, &Font, WHITE, BLACK);
-        EPD_2IN13_Display(BlackImage);
-        vTaskDelayUntil(&xLastWakeTime, 60 * 1000 / portTICK_RATE_MS);
+        if (sPaint_time.Sec == 0)
+        {
+            EPD_2IN13_Init(EPD_2IN13_PART);
+            Paint_ClearWindows(TIME_X, TIME_Y, TIME_X + Font.Width * TIME_LEN, TIME_Y + Font.Height, WHITE);
+            Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font, WHITE, BLACK);
+            EPD_2IN13_Display(BlackImage);
+        }
+        vTaskDelayUntil(&xLastWakeTime, 1 * 1000 / portTICK_RATE_MS);
     }
 }
 
 void content_Task(void *pvParameters)
 {
-    struct MQTTMessage *pxRxedMessage = NULL; //结构体类型的指针变量
-    pxRxedMessage = &xMessage;                //指针指向AMessage结构体
+    epdMessage *pxRxedMessage = NULL; //结构体类型的指针变量
+    pxRxedMessage = (epdMessage *)malloc(sizeof(epdMessage));
+    // pxRxedMessage = &xMessage;                //指针指向AMessage结构体
     while (1)
     {
-        if (xQueue == NULL)
+        if (epdQueue == NULL)
         {
             ESP_LOGE(TAG, "消息队列未初始化");
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
         }
-        if (xQueueReceive(xQueue, (void *)pxRxedMessage, (TickType_t)10))
+        if (xQueueReceive(epdQueue, (void *)pxRxedMessage, (TickType_t)10))
         {
-            /*订阅成功说明Wi-Fi连接没问题，更新Wi-Fi图标*/
-            if (pxRxedMessage->data_type == QUEUE_TYPE_CONNECT_SUCCESS)
+            if (pxRxedMessage->data_type == QUEUE_TYPE_MQTT)
             {
-                Paint_ClearWindows(Paint.Width - 18*2, 0, 16, 16, WHITE);
-                Paint_DrawBitMapFree(gImage_connect, Paint.Width - 18*2, 0, 16, 16);
-                EPD_2IN13_Display(BlackImage);
-                printf("wifi connect success\r\n");
-                continue;
-            }
-            if (pxRxedMessage->data_type == QUEUE_TYPE_JSON)
-            {
+                ESP_LOGI(TAG, "QUEUE_TYPE_MQTT:Topic:%s\r\n",pxRxedMessage->topic);
                 if (strcmp(pxRxedMessage->topic, SUB_TOPIC_REFRESH) == 0)
                 {
                     EPD_display_refresh(pxRxedMessage->data, pxRxedMessage->data_len);
                 }
                 if (strcmp(pxRxedMessage->topic, SUB_TOPIC_DATA) == 0)
                 {
+                    printf("MQTT:data:=%s\r\n",pxRxedMessage->data);
                     EPD_display_text(pxRxedMessage->data, pxRxedMessage->data_len);
                 }
             }
+            else if (pxRxedMessage->data_type == QUEUE_TYPE_WEATHER_NOW)
+            {
+                printf("更新当前天气");
+            }
+            else if (pxRxedMessage->data_type == QUEUE_TYPE_WEATHER_3D)
+            {
+                printf("更新未来三天天气");
+            }
         }
+
+        if (weather_now.flag == 1)
+        {
+            weather_now.flag = 0;
+            EPD_display_weather_now();
+        }
+
     }
 }
 void EPD_display_refresh(char *json_str, uint16_t str_len)
@@ -235,6 +287,17 @@ void show_text(uint8_t x, uint8_t y, char *text)
     free(show_text); //释放内存
 }
 
+void time_init_display(void)
+{
+    uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
+    uint8_t TIME_Y = 0;
+    sFONT Font = Font16;
+    sPaint_time.Hour = 00;
+    sPaint_time.Min = 00;
+    Paint_SelectImage(BlackImage);                                     //选择图像存储空间
+    Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font, WHITE, BLACK); // 时间
+}
+
 void EPD_init(void)
 {
     Imagesize = ((EPD_2IN13_WIDTH % 8 == 0) ? (EPD_2IN13_WIDTH / 8) : (EPD_2IN13_WIDTH / 8 + 1)) * EPD_2IN13_HEIGHT;
@@ -251,27 +314,34 @@ void EPD_init(void)
     Paint_Clear(WHITE);
 
     time_init_display();
-    Paint_DrawBitMapFree(gImage_battery_half,Paint.Width-18,0,16,16);
-    Paint_DrawBitMapFree(gImage_disconnect, Paint.Width - 18*2, 0, 16, 16); // Wi-Fi
+    Paint_DrawBitMapFree(gImage_battery_half, Paint.Width - 18, 0, 16, 16);
+    Paint_DrawBitMapFree(gImage_disconnect, Paint.Width - 18 * 2, 0, 16, 16); // Wi-Fi
 
+    /**>绘制网格*/
+    Paint_DrawLine(1, TASKBARH_HIGH + 1, Paint.Width, TASKBARH_HIGH + 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);  //横线
+    Paint_DrawLine(wind_width, TASKBARH_HIGH, wind_width, Paint.Height, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);   //竖线
+    Paint_DrawLine(wind_width, wind_high - 2, Paint.Width, wind_high - 2, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); //横线
     EPD_2IN13_Display(BlackImage);
 }
 
-void time_init_display(void)
+/*Wi-Fi连接没问题，更新Wi-Fi图标*/
+static void up_wifi_connected()
 {
-    sFONT Font = Font16;
-    uint8_t content_len = 5; // 时间显示占5个字
-    uint8_t start_x = 0;
-    uint8_t start_y = 0;
-    // PAINT_TIME sPaint_time;
-    sPaint_time.Hour = 00;
-    sPaint_time.Min = 00;
-    Paint_SelectImage(BlackImage);                                       //选择图像存储空间
-    Paint_DrawTime(start_x, start_y, &sPaint_time, &Font, WHITE, BLACK); // 时间
+    Paint_ClearWindows(Paint.Width - 18 * 2, 0, 16, 16, WHITE);
+    Paint_DrawBitMapFree(gImage_connect, Paint.Width - 18 * 2, 0, 16, 16);
+    EPD_2IN13_Display(BlackImage);
+    printf("wifi connect success\r\n");
 }
-
 void EPD_start(void)
 {
+    up_wifi_connected();
+
+    epdQueue = xQueueCreate(QUEUE_LEN, sizeof(struct MQTTMessage *));
+    if (NULL == epdQueue)
+    {
+        ESP_LOGE(TAG, "创建Queue消息队列失败\r\n");
+    }
+
     xTaskCreate(time_Task, "PaperTimeTask", 4096 * 2, (void *)0, 5, &xTimeTask);
     configASSERT(xTimeTask);
     if (NULL == xTimeTask)
@@ -279,7 +349,7 @@ void EPD_start(void)
         ESP_LOGE(TAG, "Paper Time Task Create Error\r\n");
     }
 
-    xTaskCreate(content_Task, "PaperContentTask", 4096 * 8, (void *)0, 5, &xContentTask);
+    xTaskCreate(content_Task, "PaperContentTask", 1024 * 32, (void *)0, 5, &xContentTask);
     configASSERT(xContentTask);
     if (NULL == xContentTask)
     {

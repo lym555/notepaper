@@ -206,6 +206,9 @@ void Paint_DrawBitMap(const unsigned char* image_buffer);
 void Paint_DrawBitMap_Block(const unsigned char* image_buffer, UBYTE Region);
 void Paint_DrawBitMapFree(const unsigned char* image_buffer, UWORD x, UWORD y, UWORD w, UWORD h );
 
+
+void Paint_DrawTime_Month(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font,
+                    UWORD Color_Foreground, UWORD Color_Background);
 #endif
 
 

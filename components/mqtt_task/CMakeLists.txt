@@ -3,4 +3,5 @@ idf_component_register(SRCS "src/mqtt_task.c"
                     REQUIRES  nvs_flash 
                     protocol_examples_common
                     mqtt tool
+                    Display
                     )

@@ -8,9 +8,29 @@
 #include "Debug.h"
 #include <stdlib.h> // malloc() free()
 
+#define INTERVAL 3 //间隔
+#define TASKBARH_HIGH 16
+#define TASKBARH_IMAGE 16
+
+#define TIME_FONT_WIDTH Font16.Width
+#define TIME_FONT_HEIGHT Font16.Height
+#define TIME_LEN 5
+
+
+#define wind_width  160
+#define wind_high   72 
+
+// #define TASKBARH_HIGH  16    //状态栏的高度
+// #define TASKBARH_IMAGE  16    //状态栏中图片的高度
+
+// #define TIME_FONT  Font16
+// #define TIME_LEN 5
+
+
 
 PAINT_TIME sPaint_time;
 extern uint8_t NPT_FLAG;
+
 extern UBYTE *BlackImage;
 void EPD_init(void);
 void EPD_start(void);

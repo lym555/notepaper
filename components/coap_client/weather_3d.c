@@ -22,6 +22,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "freertos/queue.h"
 
 #include "esp_log.h"
 #include "esp_wifi.h"
@@ -39,7 +40,7 @@
 #include "coap.h"
 
 #include "coap_client.h"
-
+#include "epd_queue.h"
 
 #define COAP_DEFAULT_TIME_SEC 5
 
@@ -75,10 +76,10 @@
 */
 // #define COAP_DEFAULT_DEMO_URI CONFIG_EXAMPLE_TARGET_DOMAIN_URI
 
-#define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
-#define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
-#define COAP_NTP_URI "coap://api.gaojulong.com/ntp"
-
+// #define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
+// #define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
+// #define COAP_NTP_URI "coap://api.gaojulong.com/ntp"
+#define COAP_WEATHER_3D_URL "coap://192.168.123.56/weather/3d"
 
 // #define COAP_DEFAULT_DEMO_URI "coap://192.168.123.56:5683/weather/getWeather?location=117.282488,31.775297"
 
@@ -106,6 +107,8 @@ extern uint8_t client_crt_end[]   asm("_binary_coap_client_crt_end");
 extern uint8_t client_key_start[] asm("_binary_coap_client_key_start");
 extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
+
+epdMessage *pxMessage = NULL;
 
 static void message_handler(coap_context_t *ctx, coap_session_t *session,
                             coap_pdu_t *sent, coap_pdu_t *received,
@@ -179,7 +182,18 @@ static void message_handler(coap_context_t *ctx, coap_session_t *session,
             printf("\n");
         } else {
             if (coap_get_data(received, &data_len, &data)) {
-                printf("Received: %.*s\n", (int)data_len, data);
+                // printf("Received: %.*s\n", (int)data_len, data);
+                pxMessage = (epdMessage*) malloc(sizeof(epdMessage));
+                if(pxMessage == NULL)
+                {
+                    ESP_LOGE(TAG,"内存分配失败\r\n");
+                }
+                pxMessage->data_type = QUEUE_TYPE_WEATHER_3D;
+                strncpy(pxMessage->data,(char*)data,(int)data_len);
+                // pxMessage->data = data;
+                pxMessage->data_len = (int)data_len;
+                xQueueSend( epdQueue, ( void * ) pxMessage, ( TickType_t ) 0 );
+                // printf("data: %.*s\n", pxMessage->data_len , pxMessage->data );
             }
         }
     }
@@ -455,7 +469,7 @@ clean_up:
 
 void get_weather_3d(void)
 {
-    xTaskCreate(coap_weather_3d, "coap_weather_3d", 8 * 1024, NULL, 5, NULL);
+    xTaskCreate(coap_weather_3d, "coap_weather_3d", 16 * 1024, NULL, 5, NULL);
     //  vTaskDelay(1000 / portTICK_PERIOD_MS);
     // xTaskCreate(coap_ntp, "coap_ntp", 8 * 1024, NULL, 5, NULL);
     //  vTaskDelay(1000 / portTICK_PERIOD_MS);

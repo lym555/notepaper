@@ -35,7 +35,8 @@
 			"cjson.h": "c",
 			"future": "c",
 			"system_error": "c",
-			"coap_weather.h": "c"
+			"coap_weather.h": "c",
+			"epd_queue.h": "c"
 		}
 	}
 }

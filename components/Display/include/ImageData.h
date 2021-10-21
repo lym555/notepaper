@@ -40,6 +40,14 @@ const unsigned char gImage_battery_full[32];
 const unsigned char gImage_battery_charging[32];
 
 const unsigned char gImage_clear[128];
+const unsigned char gImage_clear_64[512];
+const unsigned char gImage_clear_48[288];
+const unsigned char gImage_humidity_16[32];
+const unsigned char gImage_upper_limit_16[32];
+const unsigned char gImage_lower_limit_16[32];
+const unsigned char gImage_heavy_rain_48[288];
+const unsigned char gImage_cloudy_48[288];
+const unsigned char gImage_cloudy_32[128];
 #endif
 /* FILE END */
 

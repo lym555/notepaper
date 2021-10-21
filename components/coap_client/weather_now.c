@@ -22,6 +22,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "freertos/semphr.h"
+#include "freertos/queue.h"
 
 #include "esp_log.h"
 #include "esp_wifi.h"
@@ -39,6 +41,8 @@
 #include "coap.h"
 
 #include "coap_client.h"
+#include "epd_queue.h"
+#include "cJSON.h"
 
 
 #define COAP_DEFAULT_TIME_SEC 5
@@ -75,10 +79,10 @@
 */
 // #define COAP_DEFAULT_DEMO_URI CONFIG_EXAMPLE_TARGET_DOMAIN_URI
 
-#define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
-#define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
-#define COAP_NTP_URI "coap://api.gaojulong.com/ntp"
-
+// #define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
+// #define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
+// #define COAP_NTP_URI "coap://api.gaojulong.com/ntp"
+#define COAP_WEATHER_NOW_URL "coap://192.168.123.56/weather/now"
 
 // #define COAP_DEFAULT_DEMO_URI "coap://192.168.123.56:5683/weather/getWeather?location=117.282488,31.775297"
 
@@ -106,6 +110,27 @@ extern uint8_t client_crt_end[]   asm("_binary_coap_client_crt_end");
 extern uint8_t client_key_start[] asm("_binary_coap_client_key_start");
 extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
+
+epdMessage *pxWeatherNowMessage = NULL;
+
+void weather_now_parse(char *json_str, uint16_t str_len)
+{
+    cJSON *root = NULL;
+    root = cJSON_ParseWithLength(json_str, str_len);
+    // char* code = cJSON_GetObjectItem(root, "code")->valuestring;
+    // char* temp = cJSON_GetObjectItem(root, "temp")->valuestring;
+    // char* icon = cJSON_GetObjectItem(root, "icon")->valuestring;
+    // char* text = cJSON_GetObjectItem(root, "text")->valuestring;
+    // char* humidity = cJSON_GetObjectItem(root, "humidity")->valuestring;
+
+    strcpy(weather_now.code,cJSON_GetObjectItem(root, "code")->valuestring);
+    strcpy(weather_now.temp,cJSON_GetObjectItem(root, "temp")->valuestring);
+    strcpy(weather_now.icon,cJSON_GetObjectItem(root, "icon")->valuestring);
+    strcpy(weather_now.text,cJSON_GetObjectItem(root, "text")->valuestring);
+    strcpy(weather_now.humidity,cJSON_GetObjectItem(root, "humidity")->valuestring);
+
+    cJSON_Delete(root);
+}
 
 static void message_handler(coap_context_t *ctx, coap_session_t *session,
                             coap_pdu_t *sent, coap_pdu_t *received,
@@ -178,8 +203,19 @@ static void message_handler(coap_context_t *ctx, coap_session_t *session,
             }
             printf("\n");
         } else {
-            if (coap_get_data(received, &data_len, &data)) {
-                printf("Received: %.*s\n", (int)data_len, data);
+            if (coap_get_data(received, &data_len, &data)) { 
+                weather_now_parse((char*)data, (int)data_len);
+                weather_now.flag = 1;
+                // epdMessage *pxMessage = (epdMessage*) malloc(sizeof(epdMessage));
+                // printf("Received: %.*s\n", (int)data_len, data);
+                // epdMessage *pxMessage = (epdMessage*) malloc(sizeof(epdMessage));
+                // pxWeatherNowMessage = (epdMessage*) malloc(sizeof(epdMessage));
+                // pxWeatherNowMessage->data_type = QUEUE_TYPE_WEATHER_NOW;
+                // pxWeatherNowMessage->data = (char*)data;
+                // strncpy(pxWeatherNowMessage->data, (char*)data, (int)data_len+1);
+                // pxWeatherNowMessage->data_len = (int)data_len;
+                // xQueueSend( epdQueue, ( void * ) pxWeatherNowMessage, ( TickType_t ) 0 );
+
             }
         }
     }
@@ -450,5 +486,6 @@ clean_up:
 
 void get_weather_now(void)
 {
+    // pxWeatherNowMessage = (epdMessage*) malloc(sizeof(epdMessage));
     xTaskCreate(coap_weather_now, "coap_weather_now", 8 * 1024, NULL, 5, NULL);
 }
