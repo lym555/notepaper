@@ -36,7 +36,8 @@
 			"future": "c",
 			"system_error": "c",
 			"coap_weather.h": "c",
-			"epd_queue.h": "c"
+			"epd_queue.h": "c",
+			"coap_client.h": "c"
 		}
 	}
 }

@@ -1,10 +1,7 @@
 
 #include <stdio.h>
 #include "mqtt_task.h"
-
 #include "EPD_2in3_display.h"
-
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -32,7 +29,6 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(example_connect());    
 
-    
     mqtt_start();
     EPD_start();
 
