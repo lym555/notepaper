@@ -79,13 +79,6 @@
 */
 // #define COAP_DEFAULT_DEMO_URI CONFIG_EXAMPLE_TARGET_DOMAIN_URI
 
-#define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
-#define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
-#define COAP_NTP_URI "coap://192.168.123.56/ntp"
-
-
-// #define COAP_DEFAULT_DEMO_URI "coap://192.168.123.56:5683/weather/getWeather?location=117.282488,31.775297"
-
 const static char *TAG = "CoAP_client";
 
 static int resp_wait = 2;
@@ -110,31 +103,12 @@ extern uint8_t client_crt_end[]   asm("_binary_coap_client_crt_end");
 extern uint8_t client_key_start[] asm("_binary_coap_client_key_start");
 extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
-// static uint8_t strcup(char *dst, char *src, uint16_t cp_start, uint16_t cp_size)
-// {
-//     char *p = dst;
-//     char *q = src+cp_start;
-//     uint16_t size = strlen(src);
-//     if ((cp_start+cp_size) > size)
-//         return 0;
 
-//     while (cp_size--)
-//     {
-//         *(p++)=*(q++);
-//     }
-//     *(p++) = '\0';
-
-//     return 1;
-
-// }
 static void update_time(char *json_str, uint8_t len)
 {
     cJSON *root = NULL;
     root = cJSON_ParseWithLength(json_str, len);
 
-    // printf("ntp = %s\r\n", cJSON_Print(root));
-   
-    // printf("time = %s\r\n", buf);
     char time_s[2];
     char *time_format = cJSON_GetObjectItem(root, "time_format")->valuestring;
     strcup(time_s,time_format,5,2);
@@ -266,7 +240,7 @@ static void coap_ntp(void *p)
     coap_set_log_level(EXAMPLE_COAP_LOG_DEFAULT_LEVEL);
 
     while (1) {
-#define BUFSIZE 40
+#define BUFSIZE 80
         unsigned char _buf[BUFSIZE];
         unsigned char *buf;
         size_t buflen;

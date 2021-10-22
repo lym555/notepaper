@@ -80,7 +80,7 @@
 // #define COAP_WEATHER_NOW_URL "coap://api.gaojulong.com/weather/now"
 // #define COAP_WEATHER_3D_URL "coap://api.gaojulong.com/weather/3d"
 // #define COAP_NTP_URI "coap://api.gaojulong.com/ntp"
-#define COAP_WEATHER_3D_URL "coap://192.168.123.56/weather/3d"
+// #define COAP_WEATHER_3D_URL "coap://192.168.123.56/weather/3d"
 
 // #define COAP_DEFAULT_DEMO_URI "coap://192.168.123.56:5683/weather/getWeather?location=117.282488,31.775297"
 
@@ -278,7 +278,7 @@ static void coap_weather_3d(void *p)
     coap_set_log_level(EXAMPLE_COAP_LOG_DEFAULT_LEVEL);
 
     while (1) {
-#define BUFSIZE 40
+#define BUFSIZE 80
         unsigned char _buf[BUFSIZE];
         unsigned char *buf;
         size_t buflen;

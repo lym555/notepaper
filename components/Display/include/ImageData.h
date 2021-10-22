@@ -31,6 +31,11 @@
 
 #ifndef _IMAGEDATA_H_
 #define _IMAGEDATA_H_
+#include <stdio.h>
+
+const unsigned char* get_weather_icon_48(uint16_t id);
+const unsigned char* get_weather_icon_32(uint16_t id);
+
 // extern const unsigned char gImage_2in13[];
 extern const unsigned char gImage_disconnect[32];
 extern const unsigned char gImage_connect[32];

@@ -1,4 +1,60 @@
 #include "ImageData.h"
+#include <stdio.h>
+
+const unsigned char *get_weather_icon_48(uint16_t id)
+{
+    switch (id)
+    {
+    case 100:
+        return gImage_clear_48; //晴天
+    case 101:
+    case 102:
+    case 103:
+    case 154:
+        return gImage_cloudy_48; //多云
+    case 104:
+        return gImage_overcast_48; //阴天
+
+    case 305:
+        return gImage_light_rain_48; //小雨
+
+    case 306:
+        return gImage_moderate_rain_48; //中雨
+
+    case 307:
+        return gImage_heavy_rain_48; //大雨
+
+    default:
+        return gImage_clear_48;
+    }
+}
+const unsigned char *get_weather_icon_32(uint16_t id)
+{
+    switch (id)
+    {
+    case 100:
+        return gImage_clear_32; //晴天
+    case 101:
+    case 102:
+    case 103:
+    case 154:
+        return gImage_cloudy_32; //多云
+    case 104:
+        return gImage_overcast_32; //阴天
+
+    case 305:
+        return gImage_light_rain_32; //小雨
+
+    case 306:
+        return gImage_moderate_rain_32; //中雨
+
+    case 307:
+        return gImage_heavy_rain_32; //大雨
+
+    default:
+        return gImage_clear_32;
+    }
+}
 
 const unsigned char gImage_disconnect[32] = { /* 0X01,0X01,0X10,0X00,0X10,0X00, */
 0XFF,0XFF,0XF9,0XFF,0XF9,0XFF,0XF3,0XFF,0XF3,0X3F,0XE6,0X3F,0XFE,0X7F,0XC0,0X33,

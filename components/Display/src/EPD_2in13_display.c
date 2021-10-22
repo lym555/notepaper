@@ -18,6 +18,7 @@ uint8_t NPT_FLAG = 0;
 static const char *TAG = "EPD_2IN13_TEST";
 char *data = "";
 
+
 TaskHandle_t xTimeTask = NULL;
 TaskHandle_t xContentTask = NULL;
 QueueHandle_t epdQueue = NULL;
@@ -34,9 +35,18 @@ static void paint_degrees_icon(uint8_t x, uint8_t y, sFONT *Font)
 static void paint_wins(void)
 {
     /**>绘制网格*/
-    Paint_DrawLine(1, TASKBARH_HIGH+1, Paint.Width, TASKBARH_HIGH+1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);  //横线
+    Paint_DrawLine(1, TASKBARH_HIGH + 1, Paint.Width, TASKBARH_HIGH + 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);  //横线
     Paint_DrawLine(wind_width, TASKBARH_HIGH, wind_width, Paint.Height, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);   //竖线
     Paint_DrawLine(wind_width, wind_high - 1, Paint.Width, wind_high - 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); //横线
+}
+
+void EPD_update_ntp(void)
+{
+    Paint_ClearWindows(0, 0, TIME_FONT_WIDTH * TIME_LEN, TIME_FONT_HEIGHT, WHITE);
+    Paint_DrawTime_Month(0, 0, &sPaint_time, &Font16, WHITE, BLACK);
+
+    Paint_ClearWindows(TIME_X, TIME_Y, TIME_X + TIME_FONT_WIDTH * TIME_LEN, TIME_Y + TIME_FONT_HEIGHT, WHITE);
+    Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font16, WHITE, BLACK);
 }
 
 void EPD_display_weather_now()
@@ -56,25 +66,24 @@ void EPD_display_weather_now()
     y_start += Font24.Height + INTERVAL;
     Paint_DrawString_EN(x_start, y_start, weather_now.text, &Font12, WHITE, BLACK);
 
-        /**>湿度*/
+    /**>湿度*/
     y_start = Paint.Height - Font16.Height;
     Paint_DrawBitMapFree(gImage_humidity_16, x_start, y_start, 16, 16);
-    x_start += 16 ;
+    x_start += 16;
 
-    strcat(weather_now.humidity,"%");
-    Paint_DrawString_EN(x_start, y_start+2, weather_now.humidity, &Font12, WHITE, BLACK);
+    strcat(weather_now.humidity, "%");
+    Paint_DrawString_EN(x_start, y_start + 2, weather_now.humidity, &Font12, WHITE, BLACK);
     /**>温度上限*/
-    x_start = wind_width / 3*2;
+    x_start = wind_width / 3 * 2;
     Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d1.tempMax, &Font12, WHITE, BLACK);
-
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d1.tempMax, &Font12, WHITE, BLACK);
 
     /**>温度下限*/
     x_start = wind_width / 3 + 8;
     Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d1.tempMin, &Font12, WHITE, BLACK);
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d1.tempMin, &Font12, WHITE, BLACK);
 
     /**>当前天气图标*/
     x_start = wind_width - 48 - 8;
@@ -88,60 +97,55 @@ void EPD_display_weather_now()
 
 void EPD_display_weather_3d()
 {
-    printf("weather_3d.d1.fxDate = %s ",weather_3d.d1.fxDate);
-    printf("weather_3d.d1.tempMin = %s ",weather_3d.d1.tempMin);
-    printf("weather_3d.d1.tempMax = %s ",weather_3d.d1.tempMax);
-    printf("weather_3d.d1.iconDay = %s ",weather_3d.d1.iconDay);
-    printf("weather_3d.d1.textDay = %s ",weather_3d.d1.textDay);
+    printf("weather_3d.d1.fxDate = %s ", weather_3d.d1.fxDate);
+    printf("weather_3d.d1.tempMin = %s ", weather_3d.d1.tempMin);
+    printf("weather_3d.d1.tempMax = %s ", weather_3d.d1.tempMax);
+    printf("weather_3d.d1.iconDay = %s ", weather_3d.d1.iconDay);
+    printf("weather_3d.d1.textDay = %s ", weather_3d.d1.textDay);
 
-    uint8_t x_2d_fx =wind_width;
-    uint8_t y_2d = 16+INTERVAL;
+    uint8_t x_2d_fx = wind_width;
+    uint8_t y_2d = 16 + INTERVAL;
     char str_fx[5];
-    strcup(str_fx,weather_3d.d2.fxDate,5,5);
+    strcup(str_fx, weather_3d.d2.fxDate, 5, 5);
     uint8_t x_start = wind_width - 48 - 8;
     uint8_t y_start = 24;
 
     Paint_DrawString_EN(x_2d_fx, y_2d, str_fx, &Font12, WHITE, BLACK);
 
-     /**>温度下限*/
-    x_start = wind_width + INTERVAL*2;
-    y_start = wind_high - 16-INTERVAL;
+    /**>温度下限*/
+    x_start = wind_width + INTERVAL * 2;
+    y_start = wind_high - 16 - INTERVAL;
     Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
-    
-    x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d2.tempMin, &Font12, WHITE, BLACK);
 
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d2.tempMin, &Font12, WHITE, BLACK);
 
     /**>温度上限*/
-    x_start = Paint.Width - 16 - Font12.Width*2 - INTERVAL*2;
+    x_start = Paint.Width - 16 - Font12.Width * 2 - INTERVAL * 2;
     Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d2.tempMax, &Font12, WHITE, BLACK);
-
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d2.tempMax, &Font12, WHITE, BLACK);
 
     uint8_t x_3d = 160;
-    uint8_t y_3d = wind_high+INTERVAL;
+    uint8_t y_3d = wind_high + INTERVAL;
 
     // char str_fx[5];
-    strcup(str_fx,weather_3d.d3.fxDate,5,5);
+    strcup(str_fx, weather_3d.d3.fxDate, 5, 5);
     Paint_DrawString_EN(x_3d, y_3d, str_fx, &Font12, WHITE, BLACK);
 
-    
-     /**>温度上限*/
-    x_start = wind_width + INTERVAL*2;
+    /**>温度上限*/
+    x_start = wind_width + INTERVAL * 2;
     y_start = Paint.Height - 16;
     Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d3.tempMin, &Font12, WHITE, BLACK);
-
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d3.tempMin, &Font12, WHITE, BLACK);
 
     /**>温度下限*/
-    x_start = Paint.Width - 16 - Font12.Width*2 - INTERVAL*2;
+    x_start = Paint.Width - 16 - Font12.Width * 2 - INTERVAL * 2;
     Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d3.tempMax, &Font12, WHITE, BLACK);
+    Paint_DrawString_EN(x_start, y_start + 2, weather_3d.d3.tempMax, &Font12, WHITE, BLACK);
 
-    
     x_2d_fx = Paint.Width - 32 - INTERVAL;
     y_2d = 16;
     Paint_DrawBitMapFree(get_weather_icon_32(atoi(weather_3d.d2.iconDay)), x_2d_fx, y_2d, 32, 32); //天气图标
@@ -156,8 +160,8 @@ void EPD_display_weather_3d()
 void time_Task(void *pvParameters)
 {
     static portTickType xLastWakeTime;
-    uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
-    uint8_t TIME_Y = 0;
+    // uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
+    // uint8_t TIME_Y = 0;
     sFONT Font = Font16;
 
     // uint8_t start_x = (Paint.Width - Font.Width * content_len) / 2;
@@ -166,19 +170,21 @@ void time_Task(void *pvParameters)
     Paint_SelectImage(BlackImage);       //选择图像存储空间
     while (1)
     {
-        if (NPT_FLAG == 1)
-        {
-            EPD_2IN13_Init(EPD_2IN13_FULL); //全局刷新
+        // if (NPT_FLAG == 1)
+        // {
+        //     ESP_LOGD(TAG, "---------更新网络时间------");
+        //     // EPD_2IN13_Init(EPD_2IN13_FULL); //全局刷新
+        //     // EPD_2IN13_Init(EPD_2IN13_PART); //局部刷新
 
-            /*绘制月份*/
-            Paint_ClearWindows(0, 0, TIME_FONT_WIDTH * TIME_LEN, TIME_FONT_HEIGHT, WHITE);
-            Paint_DrawTime_Month(0, 0, &sPaint_time, &Font, WHITE, BLACK);
+        //     /*绘制月份*/
+        //     Paint_ClearWindows(0, 0, TIME_FONT_WIDTH * TIME_LEN, TIME_FONT_HEIGHT, WHITE);
+        //     Paint_DrawTime_Month(0, 0, &sPaint_time, &Font, WHITE, BLACK);
 
-            Paint_ClearWindows(TIME_X, TIME_Y, TIME_X + TIME_FONT_WIDTH * TIME_LEN, TIME_Y + TIME_FONT_HEIGHT, WHITE);
-            Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font, WHITE, BLACK);
-            EPD_2IN13_Display(BlackImage);
-            NPT_FLAG = 0;
-        }
+        //     Paint_ClearWindows(TIME_X, TIME_Y, TIME_X + TIME_FONT_WIDTH * TIME_LEN, TIME_Y + TIME_FONT_HEIGHT, WHITE);
+        //     Paint_DrawTime(TIME_X, TIME_Y, &sPaint_time, &Font, WHITE, BLACK);
+        //     EPD_2IN13_Display(BlackImage);
+        //     NPT_FLAG = 0;
+        // }
         sPaint_time.Sec = sPaint_time.Sec + 1;
         if (sPaint_time.Sec == 60)
         {
@@ -224,14 +230,14 @@ void content_Task(void *pvParameters)
         {
             if (pxRxedMessage->data_type == QUEUE_TYPE_MQTT)
             {
-                ESP_LOGI(TAG, "QUEUE_TYPE_MQTT:Topic:%s\r\n",pxRxedMessage->topic);
+                ESP_LOGI(TAG, "QUEUE_TYPE_MQTT:Topic:%s\r\n", pxRxedMessage->topic);
                 if (strcmp(pxRxedMessage->topic, SUB_TOPIC_REFRESH) == 0)
                 {
                     EPD_display_refresh(pxRxedMessage->data, pxRxedMessage->data_len);
                 }
                 if (strcmp(pxRxedMessage->topic, SUB_TOPIC_DATA) == 0)
                 {
-                    printf("MQTT:data:=%s\r\n",pxRxedMessage->data);
+                    printf("MQTT:data:=%s\r\n", pxRxedMessage->data);
                     EPD_display_text(pxRxedMessage->data, pxRxedMessage->data_len);
                 }
             }
@@ -245,17 +251,18 @@ void content_Task(void *pvParameters)
             }
         }
 
-        if (weather_now.flag == 1 && weather_3d.flag == 1)
+        if (weather_now.flag == 1 && weather_3d.flag == 1 && NPT_FLAG == 1)
         {
             ESP_LOGI(TAG, "-----update weather--------\r\n");
             weather_now.flag = 0;
             weather_3d.flag = 0;
+            NPT_FLAG = 0;
             EPD_display_weather_now();
             EPD_display_weather_3d();
+            EPD_update_ntp();
             paint_wins();
             EPD_2IN13_Display(BlackImage);
         }
-
     }
 }
 void EPD_display_refresh(char *json_str, uint16_t str_len)
@@ -328,60 +335,60 @@ void EPD_display_text(char *json_str, uint16_t str_len)
     }
 }
 
-const unsigned char* get_weather_icon_48(uint16_t id)
-{
-    switch (id)
-    {
-    case 100:
-        return gImage_clear_48;         //晴天
-    case 101:
-    case 102:
-    case 103:
-    case 154:
-        return gImage_cloudy_48;        //多云
-    case 104:
-        return gImage_overcast_48;      //阴天
+// const unsigned char *get_weather_icon_48(uint16_t id)
+// {
+//     switch (id)
+//     {
+//     case 100:
+//         return gImage_clear_48; //晴天
+//     case 101:
+//     case 102:
+//     case 103:
+//     case 154:
+//         return gImage_cloudy_48; //多云
+//     case 104:
+//         return gImage_overcast_48; //阴天
 
-    case 305:
-        return gImage_light_rain_48;    //小雨
+//     case 305:
+//         return gImage_light_rain_48; //小雨
 
-    case 306:
-        return gImage_moderate_rain_48; //中雨
+//     case 306:
+//         return gImage_moderate_rain_48; //中雨
 
-    case 307:
-        return gImage_heavy_rain_48;    //大雨
-    
-    default:
-         return gImage_clear_48;
-    }
-}
-const unsigned char* get_weather_icon_32(uint16_t id)
-{
-    switch (id)
-    {
-    case 100:
-        return gImage_clear_32;         //晴天
-    case 101:
-    case 102:
-    case 103:
-    case 154:
-        return gImage_cloudy_32;        //多云
-    case 104:
-        return gImage_overcast_32;      //阴天
+//     case 307:
+//         return gImage_heavy_rain_48; //大雨
 
-    case 305:
-        return gImage_light_rain_32;    //小雨
+//     default:
+//         return gImage_clear_48;
+//     }
+// }
+// const unsigned char *get_weather_icon_32(uint16_t id)
+// {
+//     switch (id)
+//     {
+//     case 100:
+//         return gImage_clear_32; //晴天
+//     case 101:
+//     case 102:
+//     case 103:
+//     case 154:
+//         return gImage_cloudy_32; //多云
+//     case 104:
+//         return gImage_overcast_32; //阴天
 
-    case 306:
-        return gImage_moderate_rain_32; //中雨
+//     case 305:
+//         return gImage_light_rain_32; //小雨
 
-    case 307:
-        return gImage_heavy_rain_32;    //大雨
-    
-    default:
-         return gImage_clear_32;
-    }
-}
+//     case 306:
+//         return gImage_moderate_rain_32; //中雨
+
+//     case 307:
+//         return gImage_heavy_rain_32; //大雨
+
+//     default:
+//         return gImage_clear_32;
+//     }
+// }
 
 void show_text(uint8_t x, uint8_t y, char *text)
 {
@@ -419,8 +426,8 @@ void show_text(uint8_t x, uint8_t y, char *text)
 
 void time_init_display(void)
 {
-    uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
-    uint8_t TIME_Y = 0;
+    // uint8_t TIME_X = EPD_2IN13_HEIGHT - TASKBARH_IMAGE * 2 - TIME_FONT_WIDTH * TIME_LEN - INTERVAL * 2;
+    // uint8_t TIME_Y = 0;
     sFONT Font = Font16;
     sPaint_time.Hour = 00;
     sPaint_time.Min = 00;
@@ -443,14 +450,12 @@ void EPD_init(void)
     Paint_NewImage(BlackImage, EPD_2IN13_WIDTH, EPD_2IN13_HEIGHT, 270, WHITE);
     Paint_Clear(WHITE);
 
-    time_init_display();
+    // time_init_display();
     Paint_DrawBitMapFree(gImage_battery_half, Paint.Width - 18, 0, 16, 16);
     Paint_DrawBitMapFree(gImage_disconnect, Paint.Width - 18 * 2, 0, 16, 16); // Wi-Fi
 
     EPD_2IN13_Display(BlackImage);
 }
-
-
 
 /*Wi-Fi连接没问题，更新Wi-Fi图标*/
 static void up_wifi_connected()

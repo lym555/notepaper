@@ -12,9 +12,12 @@
 #define TASKBARH_HIGH 16
 #define TASKBARH_IMAGE 16
 
+
 #define TIME_FONT_WIDTH Font16.Width
 #define TIME_FONT_HEIGHT Font16.Height
-#define TIME_LEN 5
+#define TIME_X      157
+#define TIME_Y      0
+#define TIME_LEN    5
 
 
 #define wind_width  160
@@ -37,6 +40,6 @@ void EPD_start(void);
 void EPD_display_text(char *json_str, uint16_t str_len);
 void EPD_display_refresh(char *json_str, uint16_t str_len);
 void show_text(uint8_t x, uint8_t y, char *test);
-const unsigned char* get_weather_icon_48(uint16_t id);
-const unsigned char* get_weather_icon_32(uint16_t id);
+// const unsigned char* get_weather_icon_48(uint16_t id);
+// const unsigned char* get_weather_icon_32(uint16_t id);
 #endif
