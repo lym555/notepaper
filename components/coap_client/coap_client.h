@@ -17,5 +17,24 @@ struct
     char humidity[4];
 }weather_now;
 
+struct weather
+{
+    char fxDate[16];
+    char tempMin[4];
+    char tempMax[4];
+    char iconDay[4];
+    char textDay[16];
+};
+
+
+struct 
+{
+    uint8_t flag;
+    char code[4];
+    struct weather d1;
+    struct weather d2;
+    struct weather d3;
+}weather_3d;
+
 
 #endif

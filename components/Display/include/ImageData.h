@@ -39,15 +39,36 @@ const unsigned char gImage_battery_empty[32];
 const unsigned char gImage_battery_full[32];
 const unsigned char gImage_battery_charging[32];
 
-const unsigned char gImage_clear[128];
-const unsigned char gImage_clear_64[512];
-const unsigned char gImage_clear_48[288];
+//温度和湿度
 const unsigned char gImage_humidity_16[32];
 const unsigned char gImage_upper_limit_16[32];
 const unsigned char gImage_lower_limit_16[32];
+
+//晴天
+const unsigned char gImage_clear_32[128];
+const unsigned char gImage_clear_48[288];
+const unsigned char gImage_clear_64[512];
+
+//大雨
+const unsigned char gImage_heavy_rain_32[128];
 const unsigned char gImage_heavy_rain_48[288];
-const unsigned char gImage_cloudy_48[288];
+
+//多云
 const unsigned char gImage_cloudy_32[128];
+const unsigned char gImage_cloudy_48[288];
+
+//阴天
+const unsigned char gImage_overcast_32[128];
+const unsigned char gImage_overcast_48[288];
+
+//中雨
+const unsigned char gImage_moderate_rain_32[128];
+const unsigned char gImage_moderate_rain_48[288];
+
+//小雨
+const unsigned char gImage_light_rain_32[128];
+const unsigned char gImage_light_rain_48[288];
+
 #endif
 /* FILE END */
 

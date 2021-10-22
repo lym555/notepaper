@@ -42,6 +42,7 @@
 
 #include "EPD_2in3_display.h"
 #include "cJSON.h"
+#include "tool.h"
 
 
 #define COAP_DEFAULT_TIME_SEC 5
@@ -109,23 +110,23 @@ extern uint8_t client_crt_end[]   asm("_binary_coap_client_crt_end");
 extern uint8_t client_key_start[] asm("_binary_coap_client_key_start");
 extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
-static uint8_t strcup(char *dst, char *src, uint16_t cp_start, uint16_t cp_size)
-{
-    char *p = dst;
-    char *q = src+cp_start;
-    uint16_t size = strlen(src);
-    if ((cp_start+cp_size) > size)
-        return 0;
+// static uint8_t strcup(char *dst, char *src, uint16_t cp_start, uint16_t cp_size)
+// {
+//     char *p = dst;
+//     char *q = src+cp_start;
+//     uint16_t size = strlen(src);
+//     if ((cp_start+cp_size) > size)
+//         return 0;
 
-    while (cp_size--)
-    {
-        *(p++)=*(q++);
-    }
-    *(p++) = '\0';
+//     while (cp_size--)
+//     {
+//         *(p++)=*(q++);
+//     }
+//     *(p++) = '\0';
 
-    return 1;
+//     return 1;
 
-}
+// }
 static void update_time(char *json_str, uint8_t len)
 {
     cJSON *root = NULL;

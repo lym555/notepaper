@@ -37,7 +37,7 @@ void app_main(void)
     EPD_start();
 
     get_ntp();
-    // get_weather_3d();
+    get_weather_3d();
     get_weather_now();
     while (1)
     {

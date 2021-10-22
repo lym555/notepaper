@@ -37,4 +37,6 @@ void EPD_start(void);
 void EPD_display_text(char *json_str, uint16_t str_len);
 void EPD_display_refresh(char *json_str, uint16_t str_len);
 void show_text(uint8_t x, uint8_t y, char *test);
+const unsigned char* get_weather_icon_48(uint16_t id);
+const unsigned char* get_weather_icon_32(uint16_t id);
 #endif

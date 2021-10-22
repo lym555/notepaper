@@ -8,6 +8,7 @@
 #include "ImageData.h"
 #include "cJSON.h"
 #include "coap_client.h"
+#include "tool.h"
 
 // void time_init_display(void);
 
@@ -30,11 +31,18 @@ static void paint_degrees_icon(uint8_t x, uint8_t y, sFONT *Font)
     Paint_DrawCircle(x, y + 4, 2, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
     Paint_DrawString_EN(x + 2, y, "C", Font, WHITE, BLACK);
 }
+static void paint_wins(void)
+{
+    /**>绘制网格*/
+    Paint_DrawLine(1, TASKBARH_HIGH+1, Paint.Width, TASKBARH_HIGH+1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);  //横线
+    Paint_DrawLine(wind_width, TASKBARH_HIGH, wind_width, Paint.Height, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);   //竖线
+    Paint_DrawLine(wind_width, wind_high - 1, Paint.Width, wind_high - 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); //横线
+}
 
 void EPD_display_weather_now()
 {
     printf("weather_now.code = %s\r\n", weather_now.code);
-     printf("weather_now.text = %s\r\n", weather_now.text);
+    printf("weather_now.text = %s\r\n", weather_now.text);
     uint8_t x_start = 10;
     uint8_t y_start = 32;
     // /**>当前温度*/
@@ -47,8 +55,6 @@ void EPD_display_weather_now()
     x_start = 10;
     y_start += Font24.Height + INTERVAL;
     Paint_DrawString_EN(x_start, y_start, weather_now.text, &Font12, WHITE, BLACK);
-    EPD_2IN13_Display(BlackImage);
-    printf("更新当前天气\r\n");
 
         /**>湿度*/
     y_start = Paint.Height - Font16.Height;
@@ -61,26 +67,90 @@ void EPD_display_weather_now()
     x_start = wind_width / 3*2;
     Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, "30", &Font12, WHITE, BLACK);
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d1.tempMax, &Font12, WHITE, BLACK);
 
 
     /**>温度下限*/
     x_start = wind_width / 3 + 8;
     Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
     x_start += 16 + INTERVAL;
-    Paint_DrawString_EN(x_start, y_start+2, "20", &Font12, WHITE, BLACK);
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d1.tempMin, &Font12, WHITE, BLACK);
 
     /**>当前天气图标*/
     x_start = wind_width - 48 - 8;
     y_start = 24;
-    Paint_DrawBitMapFree(gImage_cloudy_48, x_start, y_start, 48, 48); //天气图标
-
-    
+    uint16_t icon_id = atoi(weather_now.icon);
+    // Paint_DrawBitMapFree(get_weather_icon_48(icon_id), x_start, y_start, 48, 48); //天气图标
+    /**-----------------------------------------**/
+    Paint_DrawBitMapFree(get_weather_icon_48(icon_id), x_start, y_start, 48, 48); //天气图标
+    /**-----------------------------------------**/
 }
 
-static void EPD_display_weather_3d()
+void EPD_display_weather_3d()
 {
-    printf("更新未来3天气\r\n");
+    printf("weather_3d.d1.fxDate = %s ",weather_3d.d1.fxDate);
+    printf("weather_3d.d1.tempMin = %s ",weather_3d.d1.tempMin);
+    printf("weather_3d.d1.tempMax = %s ",weather_3d.d1.tempMax);
+    printf("weather_3d.d1.iconDay = %s ",weather_3d.d1.iconDay);
+    printf("weather_3d.d1.textDay = %s ",weather_3d.d1.textDay);
+
+    uint8_t x_2d_fx =wind_width;
+    uint8_t y_2d = 16+INTERVAL;
+    char str_fx[5];
+    strcup(str_fx,weather_3d.d2.fxDate,5,5);
+    uint8_t x_start = wind_width - 48 - 8;
+    uint8_t y_start = 24;
+
+    Paint_DrawString_EN(x_2d_fx, y_2d, str_fx, &Font12, WHITE, BLACK);
+
+     /**>温度下限*/
+    x_start = wind_width + INTERVAL*2;
+    y_start = wind_high - 16-INTERVAL;
+    Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
+    
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d2.tempMin, &Font12, WHITE, BLACK);
+
+
+    /**>温度上限*/
+    x_start = Paint.Width - 16 - Font12.Width*2 - INTERVAL*2;
+    Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d2.tempMax, &Font12, WHITE, BLACK);
+
+
+    uint8_t x_3d = 160;
+    uint8_t y_3d = wind_high+INTERVAL;
+
+    // char str_fx[5];
+    strcup(str_fx,weather_3d.d3.fxDate,5,5);
+    Paint_DrawString_EN(x_3d, y_3d, str_fx, &Font12, WHITE, BLACK);
+
+    
+     /**>温度上限*/
+    x_start = wind_width + INTERVAL*2;
+    y_start = Paint.Height - 16;
+    Paint_DrawBitMapFree(gImage_lower_limit_16, x_start, y_start, 16, 16);
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d3.tempMin, &Font12, WHITE, BLACK);
+
+
+    /**>温度下限*/
+    x_start = Paint.Width - 16 - Font12.Width*2 - INTERVAL*2;
+    Paint_DrawBitMapFree(gImage_upper_limit_16, x_start, y_start, 16, 16);
+    x_start += 16 + INTERVAL;
+    Paint_DrawString_EN(x_start, y_start+2, weather_3d.d3.tempMax, &Font12, WHITE, BLACK);
+
+    
+    x_2d_fx = Paint.Width - 32 - INTERVAL;
+    y_2d = 16;
+    Paint_DrawBitMapFree(get_weather_icon_32(atoi(weather_3d.d2.iconDay)), x_2d_fx, y_2d, 32, 32); //天气图标
+
+    x_3d = Paint.Width - 32 - INTERVAL;
+    y_3d = wind_high;
+    /**-----------------------------------------**/
+    Paint_DrawBitMapFree(get_weather_icon_32(atoi(weather_3d.d3.iconDay)), x_3d, y_3d, 32, 32); //天气图标
+    /**-----------------------------------------**/
 }
 
 void time_Task(void *pvParameters)
@@ -175,10 +245,15 @@ void content_Task(void *pvParameters)
             }
         }
 
-        if (weather_now.flag == 1)
+        if (weather_now.flag == 1 && weather_3d.flag == 1)
         {
+            ESP_LOGI(TAG, "-----update weather--------\r\n");
             weather_now.flag = 0;
+            weather_3d.flag = 0;
             EPD_display_weather_now();
+            EPD_display_weather_3d();
+            paint_wins();
+            EPD_2IN13_Display(BlackImage);
         }
 
     }
@@ -253,6 +328,61 @@ void EPD_display_text(char *json_str, uint16_t str_len)
     }
 }
 
+const unsigned char* get_weather_icon_48(uint16_t id)
+{
+    switch (id)
+    {
+    case 100:
+        return gImage_clear_48;         //晴天
+    case 101:
+    case 102:
+    case 103:
+    case 154:
+        return gImage_cloudy_48;        //多云
+    case 104:
+        return gImage_overcast_48;      //阴天
+
+    case 305:
+        return gImage_light_rain_48;    //小雨
+
+    case 306:
+        return gImage_moderate_rain_48; //中雨
+
+    case 307:
+        return gImage_heavy_rain_48;    //大雨
+    
+    default:
+         return gImage_clear_48;
+    }
+}
+const unsigned char* get_weather_icon_32(uint16_t id)
+{
+    switch (id)
+    {
+    case 100:
+        return gImage_clear_32;         //晴天
+    case 101:
+    case 102:
+    case 103:
+    case 154:
+        return gImage_cloudy_32;        //多云
+    case 104:
+        return gImage_overcast_32;      //阴天
+
+    case 305:
+        return gImage_light_rain_32;    //小雨
+
+    case 306:
+        return gImage_moderate_rain_32; //中雨
+
+    case 307:
+        return gImage_heavy_rain_32;    //大雨
+    
+    default:
+         return gImage_clear_32;
+    }
+}
+
 void show_text(uint8_t x, uint8_t y, char *text)
 {
     sFONT Font = Font16;
@@ -317,19 +447,17 @@ void EPD_init(void)
     Paint_DrawBitMapFree(gImage_battery_half, Paint.Width - 18, 0, 16, 16);
     Paint_DrawBitMapFree(gImage_disconnect, Paint.Width - 18 * 2, 0, 16, 16); // Wi-Fi
 
-    /**>绘制网格*/
-    Paint_DrawLine(1, TASKBARH_HIGH + 1, Paint.Width, TASKBARH_HIGH + 1, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);  //横线
-    Paint_DrawLine(wind_width, TASKBARH_HIGH, wind_width, Paint.Height, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);   //竖线
-    Paint_DrawLine(wind_width, wind_high - 2, Paint.Width, wind_high - 2, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); //横线
     EPD_2IN13_Display(BlackImage);
 }
+
+
 
 /*Wi-Fi连接没问题，更新Wi-Fi图标*/
 static void up_wifi_connected()
 {
     Paint_ClearWindows(Paint.Width - 18 * 2, 0, 16, 16, WHITE);
     Paint_DrawBitMapFree(gImage_connect, Paint.Width - 18 * 2, 0, 16, 16);
-    EPD_2IN13_Display(BlackImage);
+    // EPD_2IN13_Display(BlackImage);
     printf("wifi connect success\r\n");
 }
 void EPD_start(void)

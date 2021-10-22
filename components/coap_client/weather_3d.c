@@ -41,6 +41,7 @@
 
 #include "coap_client.h"
 #include "epd_queue.h"
+#include "cJSON.h"
 
 #define COAP_DEFAULT_TIME_SEC 5
 
@@ -109,6 +110,60 @@ extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
 
 epdMessage *pxMessage = NULL;
+
+void weather_3d_parse(char *json_str, uint16_t str_len)
+{
+    cJSON *root = NULL;
+    cJSON *item = NULL;
+    root = cJSON_ParseWithLength(json_str, str_len);
+    strcpy(weather_3d.code,cJSON_GetObjectItem(root, "code")->valuestring);
+    item = cJSON_GetObjectItem(root,"daily");
+    
+    uint8_t item_len = cJSON_GetArraySize(item);
+    if (item_len > 0)
+    {
+        item = item->child;
+        for (uint8_t i = 0; i < item_len; i++)
+        {
+            switch (i)
+            {
+            case 0:
+                strcpy(weather_3d.d1.fxDate,cJSON_GetObjectItem(item, "fxDate")->valuestring);
+                strcpy(weather_3d.d1.tempMin,cJSON_GetObjectItem(item, "tempMin")->valuestring);
+                strcpy(weather_3d.d1.tempMax,cJSON_GetObjectItem(item, "tempMax")->valuestring);
+                strcpy(weather_3d.d1.iconDay,cJSON_GetObjectItem(item, "iconDay")->valuestring);
+                strcpy(weather_3d.d1.textDay,cJSON_GetObjectItem(item, "textDay")->valuestring);
+                item = item->next;
+                break;
+             case 1:
+                strcpy(weather_3d.d2.fxDate,cJSON_GetObjectItem(item, "fxDate")->valuestring);
+                strcpy(weather_3d.d2.tempMin,cJSON_GetObjectItem(item, "tempMin")->valuestring);
+                strcpy(weather_3d.d2.tempMax,cJSON_GetObjectItem(item, "tempMax")->valuestring);
+                strcpy(weather_3d.d2.iconDay,cJSON_GetObjectItem(item, "iconDay")->valuestring);
+                strcpy(weather_3d.d2.textDay,cJSON_GetObjectItem(item, "textDay")->valuestring);
+                item = item->next;
+                break;
+             case 2:
+                strcpy(weather_3d.d3.fxDate,cJSON_GetObjectItem(item, "fxDate")->valuestring);
+                strcpy(weather_3d.d3.tempMin,cJSON_GetObjectItem(item, "tempMin")->valuestring);
+                strcpy(weather_3d.d3.tempMax,cJSON_GetObjectItem(item, "tempMax")->valuestring);
+                strcpy(weather_3d.d3.iconDay,cJSON_GetObjectItem(item, "iconDay")->valuestring);
+                strcpy(weather_3d.d3.textDay,cJSON_GetObjectItem(item, "textDay")->valuestring);
+                break;
+            default:
+                break;
+            }
+               
+        }
+            
+    }
+    // strcpy(weather_3d.d1.fxDate,cJSON_GetObjectItem(item, "fxDate")->valuestring);
+    // strcpy(weather_3d.d1.tempMin,cJSON_GetObjectItem(item, "tempMin")->valuestring);
+    // strcpy(weather_3d.d1.tempMax,cJSON_GetObjectItem(item, "tempMax")->valuestring);
+    // strcpy(weather_3d.d1.iconDay,cJSON_GetObjectItem(item, "iconDay")->valuestring);
+    // strcpy(weather_3d.d1.textDay,cJSON_GetObjectItem(item, "textDay")->valuestring);
+    cJSON_Delete(root);
+}
 
 static void message_handler(coap_context_t *ctx, coap_session_t *session,
                             coap_pdu_t *sent, coap_pdu_t *received,
@@ -183,17 +238,8 @@ static void message_handler(coap_context_t *ctx, coap_session_t *session,
         } else {
             if (coap_get_data(received, &data_len, &data)) {
                 // printf("Received: %.*s\n", (int)data_len, data);
-                pxMessage = (epdMessage*) malloc(sizeof(epdMessage));
-                if(pxMessage == NULL)
-                {
-                    ESP_LOGE(TAG,"内存分配失败\r\n");
-                }
-                pxMessage->data_type = QUEUE_TYPE_WEATHER_3D;
-                strncpy(pxMessage->data,(char*)data,(int)data_len);
-                // pxMessage->data = data;
-                pxMessage->data_len = (int)data_len;
-                xQueueSend( epdQueue, ( void * ) pxMessage, ( TickType_t ) 0 );
-                // printf("data: %.*s\n", pxMessage->data_len , pxMessage->data );
+                weather_3d_parse((char*)data, (int)data_len);
+                weather_3d.flag = 1;
             }
         }
     }
