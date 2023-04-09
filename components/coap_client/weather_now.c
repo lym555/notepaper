@@ -33,7 +33,7 @@
 
 #include "protocol_examples_common.h"
 
-#if 1
+#if 0
 /* Needed until coap_dtls.h becomes a part of libcoap proper */
 #include "libcoap.h"
 #include "coap_dtls.h"
@@ -116,7 +116,7 @@ epdMessage *pxWeatherNowMessage = NULL;
 void weather_now_parse(char *json_str, uint16_t str_len)
 {
     cJSON *root = NULL;
-    root = cJSON_ParseWithLength(json_str, str_len);
+    // root = cJSON_ParseWithLength(json_str, str_len);
     // char* code = cJSON_GetObjectItem(root, "code")->valuestring;
     // char* temp = cJSON_GetObjectItem(root, "temp")->valuestring;
     // char* icon = cJSON_GetObjectItem(root, "icon")->valuestring;

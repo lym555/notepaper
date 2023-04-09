@@ -270,7 +270,7 @@ void EPD_display_refresh(char *json_str, uint16_t str_len)
     sFONT Font = Font16;
     cJSON *root = NULL;
     cJSON *item = NULL;
-    root = cJSON_ParseWithLength(json_str, str_len);
+    // root = cJSON_ParseWithLength(json_str, str_len);
     item = cJSON_GetObjectItem(root, "data");
     uint8_t type = cJSON_GetObjectItem(root, "type")->valueint;
     uint8_t x = cJSON_GetObjectItem(item, "x")->valueint;
@@ -315,7 +315,7 @@ void EPD_display_text(char *json_str, uint16_t str_len)
 
     cJSON *root = NULL;
     cJSON *item = NULL;
-    root = cJSON_ParseWithLength(json_str, str_len);
+    // root = cJSON_ParseWithLength(json_str, str_len);
     item = cJSON_GetObjectItem(root, "data");
     // uint8_t type = cJSON_GetObjectItem(root, "type")->valueint;
 

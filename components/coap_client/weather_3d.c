@@ -32,7 +32,7 @@
 
 #include "protocol_examples_common.h"
 
-#if 1
+#if 0
 /* Needed until coap_dtls.h becomes a part of libcoap proper */
 #include "libcoap.h"
 #include "coap_dtls.h"
@@ -115,7 +115,7 @@ void weather_3d_parse(char *json_str, uint16_t str_len)
 {
     cJSON *root = NULL;
     cJSON *item = NULL;
-    root = cJSON_ParseWithLength(json_str, str_len);
+    // root = cJSON_ParseWithLength(json_str, str_len);
     strcpy(weather_3d.code,cJSON_GetObjectItem(root, "code")->valuestring);
     item = cJSON_GetObjectItem(root,"daily");
     

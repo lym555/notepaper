@@ -31,7 +31,7 @@
 
 #include "protocol_examples_common.h"
 
-#if 1
+#if 0
 /* Needed until coap_dtls.h becomes a part of libcoap proper */
 #include "libcoap.h"
 #include "coap_dtls.h"
@@ -107,7 +107,7 @@ extern uint8_t client_key_end[]   asm("_binary_coap_client_key_end");
 static void update_time(char *json_str, uint8_t len)
 {
     cJSON *root = NULL;
-    root = cJSON_ParseWithLength(json_str, len);
+    // root = cJSON_ParseWithLength(json_str, len);
 
     char time_s[2];
     char *time_format = cJSON_GetObjectItem(root, "time_format")->valuestring;

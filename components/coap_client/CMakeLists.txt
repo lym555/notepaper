@@ -4,6 +4,7 @@ idf_component_register(SRCS "weather_now.c" "weather_3d.c" "ntp.c"
                     protocol_examples_common
                     Display
                     cJSON
+                    esp_wifi
                     coap
                     EMBED_TXTFILES certs/coap_ca.pem certs/coap_client.crt certs/coap_client.key
                     )

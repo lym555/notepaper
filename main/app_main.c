@@ -38,6 +38,6 @@ void app_main(void)
     while (1)
     {
         printf("Main ...\r\n");
-        vTaskDelay(30*1000 / portTICK_RATE_MS);
+        vTaskDelay(30*1000 / 1);
     }
 }
